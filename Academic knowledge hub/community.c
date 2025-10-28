@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+void loadPosts();
+void saveAllPosts();
+void saveAllComments();
 
 Post* postListHead = NULL;
 
@@ -11,6 +14,7 @@ void getDate(char* buffer) {
     struct tm tm = *localtime(&t);
     sprintf(buffer, "%02d-%02d-%d", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900);
 }
+
 
 void createPost(char* username) {
     Post* newPost = (Post*)malloc(sizeof(Post));
@@ -33,6 +37,7 @@ void createPost(char* username) {
     newPost->comments = NULL;
     newPost->next = postListHead;
     postListHead = newPost;
+    saveAllPosts();
     printf("\n Post created successfully!\n");
 }
 void viewAllPosts() {
@@ -103,7 +108,7 @@ void addComment(char* username) {
         }
         current = current->next;
     }
-    
+    saveAllComments();
     printf("\n Post not found! Check the title and try again.\n");
 }
 void viewPostWithComments() {
@@ -150,4 +155,145 @@ void viewPostWithComments() {
     }
     
     printf("\n Post not found! Check the title and try again.\n");
+}
+void initializeCommunity() {
+    loadPosts();
+}
+
+void cleanupCommunity() {
+    Post* p = postListHead;
+    while (p) {
+        Comment* c = p->comments;
+        while (c) {
+            Comment* toFree = c;
+            c = c->next;
+            free(toFree);
+        }
+        Post* toFree = p;
+        p = p->next;
+        free(toFree);
+    }
+    postListHead = NULL;
+}
+
+void loadPosts() {
+    FILE* fp = fopen("posts.txt", "r");
+    if (!fp) {
+        return;
+    }
+
+    char line[600];
+    while (fgets(line, sizeof(line), fp)) {
+        Post* newPost = (Post*)malloc(sizeof(Post));
+        if (!newPost) continue;
+
+        char* token;
+        char lineCopy[600];
+        strcpy(lineCopy, line);
+
+        token = strtok(lineCopy, "|");
+        if (token) strncpy(newPost->title, token, 99);
+        
+        token = strtok(NULL, "|");
+        if (token) strncpy(newPost->author, token, 49);
+        
+        token = strtok(NULL, "|");
+        if (token) strncpy(newPost->date, token, 19);
+        
+        token = strtok(NULL, "|");
+        if (token) {
+            strncpy(newPost->content, token, MAX_POST - 1);
+            newPost->content[strcspn(newPost->content, "\n")] = 0;
+        }
+
+        newPost->comments = NULL;
+        newPost->next = postListHead;
+        postListHead = newPost;
+    }
+    fclose(fp);
+
+    // Load comments
+    fp = fopen("comments.txt", "r");
+    if (!fp) return;
+
+    while (fgets(line, sizeof(line), fp)) {
+        char postTitle[100], author[50], text[MAX_COMMENT];
+        char* token;
+        char lineCopy[600];
+        strcpy(lineCopy, line);
+
+        token = strtok(lineCopy, "|");
+        if (token) strncpy(postTitle, token, 99);
+        
+        token = strtok(NULL, "|");
+        if (token) strncpy(author, token, 49);
+        
+        token = strtok(NULL, "|");
+        if (token) {
+            strncpy(text, token, MAX_COMMENT - 1);
+            text[strcspn(text, "\n")] = 0;
+        }
+
+        Post* p = postListHead;
+        while (p) {
+            if (strcmp(p->title, postTitle) == 0) {
+                Comment* newComment = (Comment*)malloc(sizeof(Comment));
+                if (newComment) {
+                    strcpy(newComment->author, author);
+                    strcpy(newComment->text, text);
+                    newComment->next = NULL;
+
+                    if (!p->comments) {
+                        p->comments = newComment;
+                    } else {
+                        Comment* last = p->comments;
+                        while (last->next) last = last->next;
+                        last->next = newComment;
+                    }
+                }
+                break;
+            }
+            p = p->next;
+        }
+    }
+    fclose(fp);
+    printf(" Loaded community posts.\n");
+}
+
+void saveAllPosts() {
+    FILE* fp = fopen("posts.txt", "w");
+    if (!fp) {
+        printf(" Error: Cannot save posts!\n");
+        return;
+    }
+
+    Post* p = postListHead;
+    while (p) {
+        fprintf(fp, "%s|%s|%s|%s\n", 
+                p->title, p->author, p->date, p->content);
+        p = p->next;
+    }
+    fflush(fp);
+    fclose(fp);
+}
+
+void saveAllComments() {
+    FILE* fp = fopen("comments.txt", "w");
+    if (!fp) {
+        printf(" Error: Cannot save comments!\n");
+        return;
+    }
+
+    Post* p = postListHead;
+    while (p) {
+        Comment* c = p->comments;
+        while (c) {
+            fprintf(fp, "%s|%s|%s\n", 
+                    p->title, c->author, c->text);
+            c = c->next;
+        }
+        p = p->next;
+    }
+    fflush(fp);
+    fclose(fp);
 }

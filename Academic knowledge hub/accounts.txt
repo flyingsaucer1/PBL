@@ -1,2 +1,4 @@
-campusCoders,pbl987,admin@geu.ac.in,admin,1
 divyani,1234,240221055@geu.ac.in,student,1
+campusCoders,pbl987,admin@geu.ac.in,admin,1
+suhani,1234,246789@geu.ac.in,faculty,1
+aishika,1234,1234@geu.ac.in,student,1

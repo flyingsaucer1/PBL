@@ -1,20 +1,17 @@
-// ============================================
-// FILE: auth.c
-// Enhanced Authentication Module Implementation
-// ============================================
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include "auth.h"
+
 #define DB_FILE "accounts.txt"
+#define TEMP_FILE "accounts_temp.txt"
+
 User *hashTable[TABLE_SIZE];
 
 int validateEmail(char *email) {
     char *domain = strstr(email, "@geu.ac.in");
     if (domain == NULL) return 0;
-
     if (strlen(domain) == 10) return 1; 
     return 0;
 }
@@ -24,66 +21,115 @@ void clearInputBuffer() {
     while ((c = getchar()) != '\n' && c != EOF);
 }
 
-
 int hash(char *username) {
-    int sum = 0;
-    for (int i = 0; username[i]; i++)
-        sum += username[i];
-    return sum % TABLE_SIZE;
+    unsigned long hash = 5381;
+    int c;
+    while ((c = *username++))
+        hash = ((hash << 5) + hash) + c;
+    return hash % TABLE_SIZE;
 }
-
 
 void loadAccounts() {
     FILE *fp = fopen(DB_FILE, "r");
-    if (!fp) return;
+    if (!fp) {
+        return;
+    }
 
-    char line[300];
+    char line[512];
     while(fgets(line, sizeof(line), fp)) {
+        line[strcspn(line, "\n")] = 0;
+        if (strlen(line) == 0) continue;
+        
         User *acc = malloc(sizeof(User));
         if (!acc) continue;
         
-        sscanf(line, "%49[^,],%99[^,],%99[^,],%19[^,],%d",
-               acc->username, acc->password, acc->email, acc->role, &acc->isApproved);
- 
+        char *token;
+        char lineCopy[512];
+        strcpy(lineCopy, line);
+        
+        token = strtok(lineCopy, ",");
+        if (!token) { free(acc); continue; }
+        strncpy(acc->username, token, 49);
+        acc->username[49] = '\0';
+        
+        token = strtok(NULL, ",");
+        if (!token) { free(acc); continue; }
+        strncpy(acc->password, token, 99);
+        acc->password[99] = '\0';
+        
+        token = strtok(NULL, ",");
+        if (!token) { free(acc); continue; }
+        strncpy(acc->email, token, 99);
+        acc->email[99] = '\0';
+        
+        token = strtok(NULL, ",");
+        if (!token) { free(acc); continue; }
+        strncpy(acc->role, token, 19);
+        acc->role[19] = '\0';
+        
+        token = strtok(NULL, ",");
+        if (!token) { free(acc); continue; }
+        acc->isApproved = atoi(token);
+        
         int index = hash(acc->username);
         acc->next = hashTable[index];
         hashTable[index] = acc;
     }
+    
     fclose(fp);
 }
 
 void saveAccount(User *acc) {
     FILE *fp = fopen(DB_FILE, "a");
-    if (!fp) return;
+    if (!fp) {
+        printf(" Error: Cannot open accounts file!\n");
+        return;
+    }
 
     fprintf(fp, "%s,%s,%s,%s,%d\n", 
             acc->username, acc->password, acc->email, acc->role, acc->isApproved);
+    fflush(fp);
     fclose(fp);
 }
 
 void saveAllAccounts() {
-    FILE *fp = fopen(DB_FILE, "w");
-    if (!fp) return;
+    FILE *fp = fopen(TEMP_FILE, "w");
+    if (!fp) {
+        printf(" Error: Cannot create temporary file!\n");
+        return;
+    }
 
     for (int i = 0; i < TABLE_SIZE; i++) {
         User *temp = hashTable[i];
         while (temp != NULL) {
             fprintf(fp, "%s,%s,%s,%s,%d\n", 
-                    temp->username, temp->password, temp->email, temp->role, temp->isApproved);
+                    temp->username, temp->password, temp->email, 
+                    temp->role, temp->isApproved);
             temp = temp->next;
         }
     }
+    
     fclose(fp);
+    remove(DB_FILE);
+    rename(TEMP_FILE, DB_FILE);
 }
 
 User* createUser(char username[], char password[], char email[], char role[], int isApproved) {
     User *newUser = (User*) malloc(sizeof(User));
     if (!newUser) return NULL;
     
-    strcpy(newUser->username, username);
-    strcpy(newUser->password, password);
-    strcpy(newUser->email, email);
-    strcpy(newUser->role, role);
+    strncpy(newUser->username, username, 49);
+    newUser->username[49] = '\0';
+    
+    strncpy(newUser->password, password, 99);
+    newUser->password[99] = '\0';
+    
+    strncpy(newUser->email, email, 99);
+    newUser->email[99] = '\0';
+    
+    strncpy(newUser->role, role, 19);
+    newUser->role[19] = '\0';
+    
     newUser->isApproved = isApproved;
     newUser->next = NULL;
     return newUser;
@@ -99,7 +145,8 @@ User* findUser(char username[], char password[]) {
     int index = hash(username);
     User *temp = hashTable[index];
     while (temp != NULL) {
-        if (strcmp(temp->username, username) == 0 && strcmp(temp->password, password) == 0)
+        if (strcmp(temp->username, username) == 0 && 
+            strcmp(temp->password, password) == 0)
             return temp;
         temp = temp->next;
     }
@@ -117,7 +164,6 @@ User* findUserByUsername(char username[]) {
     return NULL;
 }
 
-
 int registerUser(char username[], char password[], char email[], char role[]) {
     if (!validateEmail(email)) {
         printf("\n Email must be in format: yourname@geu.ac.in\n");
@@ -125,33 +171,44 @@ int registerUser(char username[], char password[], char email[], char role[]) {
     }
 
     if (findUserByUsername(username) != NULL) {
+        printf("\n Username already exists!\n");
         return 0; 
     }
+    
     int approved;
     if (strcmp(role, "student") == 0) {
         approved = 1; 
     } else if (strcmp(role, "faculty") == 0 || strcmp(role, "admin") == 0) {
         approved = 0; 
-        printf("\n  Your account will be reviewed by the admin.\n");
-        printf(" Admin permission request sent!\n");
+        printf("\n Your account will be reviewed by the admin.\n");
+        printf("  Admin permission request sent!\n");
     } else {
-        return -3;     }
+        printf("\n Invalid role!\n");
+        return -3;
+    }
 
     User *newUser = createUser(username, password, email, role, approved);
     
-    if (!newUser) return -1; 
+    if (!newUser) {
+        printf("\n Memory allocation failed!\n");
+        return -1; 
+    }
     
     insertUser(newUser);
     saveAccount(newUser); 
+    
+    printf("\n Registration successful!\n");
+    if (approved) {
+        printf(" You can login now.\n");
+    }
+    
     return 1;
 }
 
 int loginUser(char username[], char password[]) {
     User *u = findUser(username, password);
     if (u == NULL) return 0; 
-    
     if (u->isApproved == 0) return -1; 
-    
     return 1; 
 }
 
@@ -224,13 +281,14 @@ void approveAccounts() {
         }
     }
     if (!found) {
-        printf("\n  No pending approvals.\n");
+        printf("\n No pending approvals.\n");
+    } else {
+        saveAllAccounts(); 
     }
-    saveAllAccounts(); 
 }
 
 void initializeSystem() {
-
+    
     for (int i = 0; i < TABLE_SIZE; i++) {
         hashTable[i] = NULL;
     }
@@ -238,18 +296,17 @@ void initializeSystem() {
     loadAccounts();
     
     if (findUserByUsername("campusCoders") == NULL) {
-        User *mainAdmin = createUser("campusCoders", "pbl987", "admin@geu.ac.in", "admin", 1);
-        insertUser(mainAdmin);
-        saveAccount(mainAdmin);
-        printf("✅ Default admin created: campusCoders / pbl987\n");
+        User *mainAdmin = createUser("campusCoders", "pbl987", 
+                                     "admin@geu.ac.in", "admin", 1);
+        if (mainAdmin) {
+            insertUser(mainAdmin);
+            saveAccount(mainAdmin);
+            printf(" Default admin created: campusCoders / pbl987\n");
+        }
     }
 }
 
-
 void displayMainMenu() {
-    printf("\n========================================\n");
-    printf("   SMART STUDY HUB - GEU\n");
-    printf("========================================\n");
     printf("1. Login\n");
     printf("2. Sign Up (Register)\n");
     printf("3. Exit\n");
@@ -266,13 +323,13 @@ void registerUserTerminal() {
     printf("========================================\n");
     
     printf("Enter username: ");
-    scanf("%s", username);
+    scanf("%49s", username);
     
     printf("Enter password: ");
-    scanf("%s", password);
+    scanf("%99s", password);
     
     printf("Enter email (must be @geu.ac.in): ");
-    scanf("%s", email);
+    scanf("%99s", email);
     
     printf("\nSelect your role:\n");
     printf("1. Student\n");
@@ -297,23 +354,7 @@ void registerUserTerminal() {
             return;
     }
     
-    int result = registerUser(username, password, email, role);
-    
-    if (result == 1) {
-        printf("\n Registration successful!\n");
-        if (strcmp(role, "student") == 0) {
-            printf(" You can login now.\n");
-        } else {
-            printf(" Waiting for admin approval...\n");
-            printf(" Check back later or contact admin.\n");
-        }
-    } else if (result == 0) {
-        printf("\n Username already exists!\n");
-    } else if (result == -2) {
-        printf(" Invalid email format!\n");
-    } else {
-        printf("\n Registration failed!\n");
-    }
+    registerUser(username, password, email, role);
 }
 
 User* login() {
@@ -323,9 +364,9 @@ User* login() {
     printf("           LOGIN\n");
     printf("========================================\n");
     printf("Enter username: ");
-    scanf("%s", username);
+    scanf("%49s", username);
     printf("Enter password: ");
-    scanf("%s", password);
+    scanf("%99s", password);
     clearInputBuffer();
 
     User *u = findUser(username, password);
@@ -343,4 +384,16 @@ User* login() {
     printf("\n Login successful!\n");
     printf(" Welcome, %s (%s)\n", u->username, u->role);
     return u;
+}
+
+void cleanupSystem() {
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        User *temp = hashTable[i];
+        while (temp != NULL) {
+            User *toFree = temp;
+            temp = temp->next;
+            free(toFree);
+        }
+        hashTable[i] = NULL;
+    }
 }

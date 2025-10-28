@@ -3,7 +3,80 @@
 #include <string.h>
 #include "faculty.h"
 
+#define FACULTY_FILE "faculty.txt"
+
 Faculty* facultyListHead = NULL;
+
+void loadFaculty() {
+    FILE* fp = fopen(FACULTY_FILE, "r");
+    if (!fp) {
+        return;
+    }
+
+    char line[400];
+    while (fgets(line, sizeof(line), fp)) {
+        Faculty* newFaculty = (Faculty*)malloc(sizeof(Faculty));
+        if (!newFaculty) continue;
+
+        char* token;
+        char lineCopy[400];
+        strcpy(lineCopy, line);
+
+        token = strtok(lineCopy, "|");
+        if (token) strncpy(newFaculty->name, token, MAX_FACULTY_NAME - 1);
+        newFaculty->name[MAX_FACULTY_NAME - 1] = '\0';
+        
+        token = strtok(NULL, "|");
+        if (token) strncpy(newFaculty->facultyId, token, 19);
+        newFaculty->facultyId[19] = '\0';
+        
+        token = strtok(NULL, "|");
+        if (token) strncpy(newFaculty->department, token, MAX_DEPT - 1);
+        newFaculty->department[MAX_DEPT - 1] = '\0';
+        
+        token = strtok(NULL, "|");
+        if (token) strncpy(newFaculty->subject, token, MAX_SUBJECT - 1);
+        newFaculty->subject[MAX_SUBJECT - 1] = '\0';
+        
+        token = strtok(NULL, "|");
+        if (token) {
+            strncpy(newFaculty->email, token, 49);
+            newFaculty->email[strcspn(newFaculty->email, "\n")] = 0;
+        }
+
+        newFaculty->next = NULL;
+
+        if (!facultyListHead) {
+            facultyListHead = newFaculty;
+        } else {
+            Faculty* temp = facultyListHead;
+            while (temp->next) temp = temp->next;
+            temp->next = newFaculty;
+        }
+    }
+
+    fclose(fp);
+    printf("✅ Loaded faculty records.\n");
+}
+
+void saveAllFaculty() {
+    FILE* fp = fopen(FACULTY_FILE, "w");
+    if (!fp) {
+        printf(" Error: Cannot save faculty!\n");
+        return;
+    }
+
+    Faculty* temp = facultyListHead;
+    while (temp) {
+        fprintf(fp, "%s|%s|%s|%s|%s\n",
+                temp->name, temp->facultyId, temp->department,
+                temp->subject, temp->email);
+        temp = temp->next;
+    }
+
+    fflush(fp);
+    fclose(fp);
+}
 
 void addFaculty() {
     Faculty* newFaculty = (Faculty*)malloc(sizeof(Faculty));
@@ -16,7 +89,6 @@ void addFaculty() {
     printf("      ADD NEW FACULTY\n");
     printf("========================================\n");
     
-    getchar();
     printf("Enter Faculty Name: ");
     fgets(newFaculty->name, MAX_FACULTY_NAME, stdin);
     newFaculty->name[strcspn(newFaculty->name, "\n")] = 0;
@@ -49,18 +121,18 @@ void addFaculty() {
         temp->next = newFaculty;
     }
     
+    saveAllFaculty();
     printf("\n Faculty added successfully!\n");
 }
 
 void removeFaculty() {
     if(facultyListHead == NULL) {
-        printf("\n  No faculty records available!\n");
+        printf("\n No faculty records available!\n");
         return;
     }
     
     char facultyId[20];
     printf("\nEnter Faculty ID to remove: ");
-    getchar();
     fgets(facultyId, 20, stdin);
     facultyId[strcspn(facultyId, "\n")] = 0;
     
@@ -76,6 +148,7 @@ void removeFaculty() {
             }
             printf("\n Faculty %s removed successfully!\n", temp->name);
             free(temp);
+            saveAllFaculty();
             return;
         }
         prev = temp;
@@ -87,7 +160,7 @@ void removeFaculty() {
 
 void viewAllFaculty() {
     if(facultyListHead == NULL) {
-        printf("\n  No faculty records available!\n");
+        printf("\n No faculty records available!\n");
         return;
     }
     
@@ -113,7 +186,6 @@ void viewAllFaculty() {
 void searchFacultyByDept() {
     char dept[MAX_DEPT];
     printf("\nEnter Department: ");
-    getchar();
     fgets(dept, MAX_DEPT, stdin);
     dept[strcspn(dept, "\n")] = 0;
     
@@ -137,14 +209,13 @@ void searchFacultyByDept() {
     }
     
     if(!found) {
-        printf("\n  No faculty found in department: %s\n", dept);
+        printf("\n No faculty found in department: %s\n", dept);
     }
 }
 
 void searchFacultyBySubject() {
     char subject[MAX_SUBJECT];
     printf("\nEnter Subject: ");
-    getchar();
     fgets(subject, MAX_SUBJECT, stdin);
     subject[strcspn(subject, "\n")] = 0;
     
@@ -168,14 +239,13 @@ void searchFacultyBySubject() {
     }
     
     if(!found) {
-        printf("\n  No faculty found for subject: %s\n", subject);
+        printf("\n No faculty found for subject: %s\n", subject);
     }
 }
 
 void searchFacultyById() {
     char facultyId[20];
     printf("\nEnter Faculty ID: ");
-    getchar();
     fgets(facultyId, 20, stdin);
     facultyId[strcspn(facultyId, "\n")] = 0;
     
@@ -198,4 +268,18 @@ void searchFacultyById() {
     }
     
     printf("\n Faculty ID not found!\n");
+}
+
+void initializeFaculty() {
+    loadFaculty();
+}
+
+void cleanupFaculty() {
+    Faculty* temp = facultyListHead;
+    while (temp) {
+        Faculty* toFree = temp;
+        temp = temp->next;
+        free(toFree);
+    }
+    facultyListHead = NULL;
 }

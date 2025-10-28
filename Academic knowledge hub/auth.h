@@ -1,30 +1,50 @@
+// ============================================
+// FILE: auth.h
+// Authentication Module Header
+// ============================================
+
 #ifndef AUTH_H
 #define AUTH_H
 
-#include "structures.h"
+#define TABLE_SIZE 100
 
-#define DB_FILE "accounts.txt"
+typedef struct User {
+    char username[50];
+    char password[100];
+    char email[100];
+    char role[20];
+    int isApproved;
+    struct User *next;
+} User;
 
-// Terminal functions
+extern User *hashTable[TABLE_SIZE];
+
 void initializeSystem();
-void displayMainMenu();
+int hash(char *username);
 void clearInputBuffer();
+
+User* createUser(char username[], char password[], char email[], char role[], int isApproved);
+void insertUser(User *user);
+User* findUser(char username[], char password[]);
+User* findUserByUsername(char username[]);
+
+int registerUser(char username[], char password[], char email[], char role[]);
+int loginUser(char username[], char password[]);
 void registerUserTerminal();
 User* login();
 
-// Backend functions
-int registerUser(char username[], char password[], char email[], char role[]);
-int loginUser(char username[], char password[]);
-User* createUser(char username[], char password[], char email[], char role[], int isApproved);
-void insertUser(User* user);
-User* findUser(char username[], char password[]);
-User* findUserByUsername(char username[]);
-void loadAccounts();
-void saveAccount(User* acc);
-void saveAllAccounts();
-int approveUser(char username[]);
-void listPendingUsers(char *result);
-void approveAccounts();
+int validateEmail(char *email);
 void getUserInfo(char username[], char *role, char *email, int *isApproved);
 
-#endif
+int approveUser(char username[]);
+void approveAccounts();
+void listPendingUsers(char *result);
+
+void loadAccounts();
+void saveAccount(User *acc);
+void saveAllAccounts();
+
+void displayMainMenu();
+void cleanupSystem();
+
+#endif // AUTH_H

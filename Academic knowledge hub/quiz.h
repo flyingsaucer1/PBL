@@ -2,9 +2,11 @@
 #define QUIZ_H
 
 void createQuiz();
-void displayAllQuestions();
-void deleteAllQuestions();
+void viewAllQuizzes();
 void takeQuiz(char* username);
+void deleteAllQuestions();
 void viewQuizSummary();
-void viewAllQuizzes(); 
-#endif
+void initializeQuiz();
+void cleanupQuiz();
+
+#endif 

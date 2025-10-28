@@ -1,0 +1,2 @@
+dsa
+which is better linked list or array?|array|linked list|both|depend upon use case|D
