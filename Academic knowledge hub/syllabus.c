@@ -35,7 +35,7 @@ int compareIgnoreCase(const char* str1, const char* str2) {
     return (str1[i] == str2[i]);
 }
 
-// Load syllabus from file
+
 void loadSyllabus() {
     FILE* fp = fopen(SYLLABUS_FILE, "r");
     if (!fp) {
@@ -94,7 +94,7 @@ void loadSyllabus() {
             author[strcspn(author, "\n")] = 0;
         }
 
-        // Find syllabus and add book
+       
         SyllabusNode* s = syllabusListHead;
         while (s) {
             if (strcmp(s->subject, subject) == 0) {
@@ -138,7 +138,7 @@ void saveAllSyllabus() {
     fclose(fp);
 }
 
-// Save all books
+
 void saveAllBooks() {
     FILE* fp = fopen(BOOKS_FILE, "w");
     if (!fp) {
@@ -388,4 +388,5 @@ void cleanupSyllabus() {
         free(toFree);
     }
     syllabusListHead = NULL;
+
 }
