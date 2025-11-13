@@ -1,0 +1,727 @@
+!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Academic Knowledge Hub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #D0021B;
+            --accent-color: #4A4A4A;
+            --success-color: #27AE60;
+            --warning-color: #F39C12;
+            --info-color: #3498DB;
+            --bg-color: #F5F7FA;
+            --card-bg: #FFFFFF;
+            --text-dark: #2C3E50;
+            --text-light: #7F8C8D;
+            --border-color: #E1E8ED;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+        }
+
+        .top-nav {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .main-container {
+            display: flex;
+            min-height: calc(100vh - 70px);
+        }
+
+        .sidebar {
+            width: 250px;
+            background: var(--card-bg);
+            padding: 2rem 0;
+            box-shadow: 2px 0 4px rgba(0,0,0,0.05);
+        }
+
+        .nav-item {
+            padding: 1rem 2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .nav-item.active {
+            background: var(--bg-color);
+            border-left-color: var(--primary-color);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .dashboard-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .welcome-section {
+            margin-bottom: 2rem;
+        }
+
+        .welcome-section h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-section p {
+            color: var(--text-light);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--text-dark);
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .stat-trend {
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+
+        .trend-up {
+            color: var(--success-color);
+        }
+
+        .trend-down {
+            color: var(--primary-color);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #B00118;
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .table-container {
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .table-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-header h3 {
+            font-size: 1.2rem;
+        }
+
+        .search-box {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            width: 250px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: var(--bg-color);
+        }
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        tbody tr:hover {
+            background: var(--bg-color);
+        }
+
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .badge-active {
+            background: #D4EDDA;
+            color: #155724;
+        }
+
+        .badge-inactive {
+            background: #F8D7DA;
+            color: #721C24;
+        }
+
+        .badge-student {
+            background: #CCE5FF;
+            color: #004085;
+        }
+
+        .badge-faculty {
+            background: #FFF3CD;
+            color: #856404;
+        }
+
+        .badge-admin {
+            background: #F8D7DA;
+            color: #721C24;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-icon {
+            padding: 0.5rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: transform 0.2s;
+        }
+
+        .btn-icon:hover {
+            transform: scale(1.2);
+        }
+
+        .chart-container {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+        }
+
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .mini-chart {
+            height: 200px;
+            background: linear-gradient(to top, var(--bg-color), transparent);
+            border-radius: 5px;
+            position: relative;
+        }
+
+        .activity-feed {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .activity-item {
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            gap: 1rem;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .activity-content h4 {
+            font-size: 0.95rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-time {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                padding: 1rem 0;
+            }
+
+            .dashboard-content {
+                padding: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+
+            table {
+                font-size: 0.85rem;
+            }
+
+            th, td {
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="top-nav">
+        <div class="logo">🎓 Academic Hub Admin</div>
+        <div class="user-info">
+            <span>campusCoders</span>
+            <div class="user-avatar">CC</div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <aside class="sidebar">
+            <div class="nav-item active">📊 Dashboard</div>
+            <div class="nav-item">👥 User Management</div>
+            <div class="nav-item">📚 Course Management</div>
+            <div class="nav-item">🎓 Faculty Management</div>
+            <div class="nav-item">📈 Analytics</div>
+            <div class="nav-item">🛡️ Content Moderation</div>
+            <div class="nav-item">⚙️ System Settings</div>
+            <div class="nav-item">📄 Reports</div>
+            <div class="nav-item">🔔 Announcements</div>
+        </aside>
+
+        <main class="dashboard-content">
+            <div class="welcome-section">
+                <h1>System Overview 🎯</h1>
+                <p>Monitor and manage your academic platform</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-number">1,247</div>
+                            <div class="stat-label">Total Students</div>
+                            <div class="stat-trend trend-up">↑ 12% from last month</div>
+                        </div>
+                        <div class="stat-icon" style="background: #E3F2FD; color: var(--info-color);">👥</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-number">84</div>
+                            <div class="stat-label">Total Faculty</div>
+                            <div class="stat-trend trend-up">↑ 3 new this month</div>
+                        </div>
+                        <div class="stat-icon" style="background: #FFF3E0; color: var(--warning-color);">👨‍🏫</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-number">156</div>
+                            <div class="stat-label">Active Courses</div>
+                            <div class="stat-trend trend-up">↑ 8 added recently</div>
+                        </div>
+                        <div class="stat-icon" style="background: #E8F5E9; color: var(--success-color);">📚</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-number">342</div>
+                            <div class="stat-label">Active Users Today</div>
+                            <div class="stat-trend trend-down">↓ 5% from yesterday</div>
+                        </div>
+                        <div class="stat-icon" style="background: #F3E5F5; color: #9C27B0;">📊</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-grid">
+                <div class="chart-container">
+                    <h3 style="margin-bottom: 1rem;">User Activity (Last 7 Days)</h3>
+                    <div class="mini-chart" style="display: flex; align-items: flex-end; justify-content: space-around; padding: 1rem;">
+                        <div style="width: 40px; height: 120px; background: var(--info-color); border-radius: 5px;"></div>
+                        <div style="width: 40px; height: 150px; background: var(--info-color); border-radius: 5px;"></div>
+                        <div style="width: 40px; height: 90px; background: var(--info-color); border-radius: 5px;"></div>
+                        <div style="width: 40px; height: 170px; background: var(--info-color); border-radius: 5px;"></div>
+                        <div style="width: 40px; height: 130px; background: var(--info-color); border-radius: 5px;"></div>
+                        <div style="width: 40px; height: 160px; background: var(--info-color); border-radius: 5px;"></div>
+                        <div style="width: 40px; height: 140px; background: var(--info-color); border-radius: 5px;"></div>
+                    </div>
+                </div>
+
+                <div class="activity-feed">
+                    <h3 style="margin-bottom: 1rem;">Recent Activity</h3>
+                    <div class="activity-item">
+                        <div class="activity-icon" style="background: #E8F5E9; color: var(--success-color);">✅</div>
+                        <div class="activity-content">
+                            <h4>New faculty member added</h4>
+                            <div class="activity-time">Prof. Michael Chen • 2 hours ago</div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon" style="background: #E3F2FD; color: var(--info-color);">📚</div>
+                        <div class="activity-content">
+                            <h4>Course "Machine Learning" created</h4>
+                            <div class="activity-time">CS Department • 5 hours ago</div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon" style="background: #FFF3E0; color: var(--warning-color);">👥</div>
+                        <div class="activity-content">
+                            <h4>45 new student registrations</h4>
+                            <div class="activity-time">Today</div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon" style="background: #FFEBEE; color: var(--primary-color);">🛡️</div>
+                        <div class="activity-content">
+                            <h4>Content flagged for review</h4>
+                            <div class="activity-time">Community Forum • Yesterday</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="section-title">
+                <span>👥 Recent Users</span>
+                <button class="btn btn-primary">+ Add New User</button>
+            </h2>
+            <div class="table-container">
+                <div class="table-header">
+                    <h3>User Management</h3>
+                    <input type="text" class="search-box" placeholder="Search users...">
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Joined</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td><span class="badge badge-student">Student</span></td>
+                            <td><span class="badge badge-active">Active</span></td>
+                            <td></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn-icon" title="Edit">✏️</button>
+                                    <button class="btn-icon" title="Delete">🗑️</button>
+                                    <button class="btn-icon" title="View">👁️</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td><span class="badge badge-faculty">Faculty</span></td>
+                            <td><span class="badge badge-active">Active</span></td>
+                            <td></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn-icon" title="Edit">✏️</button>
+                                    <button class="btn-icon" title="Delete">🗑️</button>
+                                    <button class="btn-icon" title="View">👁️</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td><span class="badge badge-student">Student</span></td>
+                            <td><span class="badge badge-active">Active</span></td>
+                            <td></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn-icon" title="Edit">✏️</button>
+                                    <button class="btn-icon" title="Delete">🗑️</button>
+                                    <button class="btn-icon" title="View">👁️</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td><span class="badge badge-faculty">Faculty</span></td>
+                            <td><span class="badge badge-active">Active</span></td>
+                            <td></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn-icon" title="Edit">✏️</button>
+                                    <button class="btn-icon" title="Delete">🗑️</button>
+                                    <button class="btn-icon" title="View">👁️</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td><span class="badge badge-student">Student</span></td>
+                            <td><span class="badge badge-inactive">Inactive</span></td>
+                            <td></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn-icon" title="Edit">✏️</button>
+                                    <button class="btn-icon" title="Delete">🗑️</button>
+                                    <button class="btn-icon" title="View">👁️</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2 class="section-title">
+                <span>📚 Course Overview</span>
+                <button class="btn btn-success">+ Create Course</button>
+            </h2>
+            <div class="table-container">
+                <div class="table-header">
+                    <h3>Active Courses</h3>
+                    <input type="text" class="search-box" placeholder="Search courses...">
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Course Code</th>
+                            <th>Course Name</th>
+                            <th>Faculty</th>
+                            <th>Students</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td><span class="badge badge-active">Active</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn-icon" title="Edit">✏️</button>
+                                    <button class="btn-icon" title="Delete">🗑️</button>
+                                    <button class="btn-icon" title="View">👁️</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td><span class="badge badge-active">Active</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn-icon" title="Edit">✏️</button>
+                                    <button class="btn-icon" title="Delete">🗑️</button>
+                                    <button class="btn-icon" title="View">👁️</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td><span class="badge badge-active">Active</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn-icon" title="Edit">✏️</button>
+                                    <button class="btn-icon" title="Delete">🗑️</button>
+                                    <button class="btn-icon" title="View">👁️</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Search functionality
+        document.querySelectorAll('.search-box').forEach(searchBox => {
+            searchBox.addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const table = this.closest('.table-container').querySelector('tbody');
+                const rows = table.querySelectorAll('tr');
+                
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(searchTerm) ? '' : 'none';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
