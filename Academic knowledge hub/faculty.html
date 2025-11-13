@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Dashboard - Academic Knowledge Hub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #F5A623;
+            --accent-color: #BD10E0;
+            --success-color: #27AE60;
+            --danger-color: #E74C3C;
+            --bg-color: #F5F7FA;
+            --card-bg: #FFFFFF;
+            --text-dark: #2C3E50;
+            --text-light: #7F8C8D;
+            --border-color: #E1E8ED;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+        }
+
+        .top-nav {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .main-container {
+            display: flex;
+            min-height: calc(100vh - 70px);
+        }
+
+        .sidebar {
+            width: 250px;
+            background: var(--card-bg);
+            padding: 2rem 0;
+            box-shadow: 2px 0 4px rgba(0,0,0,0.05);
+        }
+
+        .nav-item {
+            padding: 1rem 2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .nav-item.active {
+            background: var(--bg-color);
+            border-left-color: var(--primary-color);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .dashboard-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .welcome-section {
+            margin-bottom: 2rem;
+        }
+
+        .welcome-section h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-section p {
+            color: var(--text-light);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--text-dark);
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .course-card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.3s;
+        }
+
+        .course-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .course-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            padding: 1.5rem;
+        }
+
+        .course-code {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .course-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 0.5rem;
+        }
+
+        .course-body {
+            padding: 1.5rem;
+        }
+
+        .course-stat {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .course-stat span:last-child {
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .course-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            flex: 1;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #E09612;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .list-container {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+        }
+
+        .list-item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .list-item-info h4 {
+            margin-bottom: 0.5rem;
+        }
+
+        .list-item-meta {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .badge-pending {
+            background: #FFF3CD;
+            color: #856404;
+        }
+
+        .badge-urgent {
+            background: #F8D7DA;
+            color: #721C24;
+        }
+
+        .badge-active {
+            background: #D4EDDA;
+            color: #155724;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .action-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .action-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .action-label {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                padding: 1rem 0;
+            }
+
+            .dashboard-content {
+                padding: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .courses-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="top-nav">
+        <div class="logo">🎓 Academic Hub</div>
+        <div class="user-info">
+            <span>Prof. Falak Mehra</span>
+            <div class="user-avatar">FM</div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <aside class="sidebar">
+            <div class="nav-item active">📊 Dashboard</div>
+            <div class="nav-item">📚 My Courses</div>
+            <div class="nav-item">👥 Students</div>
+            <div class="nav-item">📝 Syllabus</div>
+            <div class="nav-item">📖 Upload Notes</div>
+            <div class="nav-item">❓ Answer Doubts</div>
+            <div class="nav-item">✅ Quiz Creator</div>
+            <div class="nav-item">📊 Analytics</div>
+            <div class="nav-item">👤 Profile</div>
+        </aside>
+
+        <main class="dashboard-content">
+            <div class="welcome-section">
+                <h1>Welcome back, Prof. Mehra ! 👋</h1>
+                <p>You have 8 pending doubts and 2 quizzes to review</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-number">4</div>
+                            <div class="stat-label">Courses Teaching</div>
+                        </div>
+                        <div class="stat-icon" style="background: #FFF3E0; color: var(--primary-color);">📚</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-number">142</div>
+                            <div class="stat-label">Total Students</div>
+                        </div>
+                        <div class="stat-icon" style="background: #F3E5F5; color: var(--accent-color);">👥</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-number">8</div>
+                            <div class="stat-label">Pending Doubts</div>
+                        </div>
+                        <div class="stat-icon" style="background: #FFEBEE; color: var(--danger-color);">❓</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-number">12</div>
+                            <div class="stat-label">Active Quizzes</div>
+                        </div>
+                        <div class="stat-icon" style="background: #E8F5E9; color: var(--success-color);">✅</div>
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="section-title">⚡ Quick Actions</h2>
+            <div class="quick-actions">
+                <div class="action-card">
+                    <div class="action-icon">📝</div>
+                    <div class="action-label">Create Quiz</div>
+                </div>
+                <div class="action-card">
+                    <div class="action-icon">📖</div>
+                    <div class="action-label">Upload Notes</div>
+                </div>
+                <div class="action-card">
+                    <div class="action-icon">📋</div>
+                    <div class="action-label">Update Syllabus</div>
+                </div>
+                <div class="action-card">
+                    <div class="action-icon">📢</div>
+                    <div class="action-label">Announcement</div>
+                </div>
+            </div>
+
+            <h2 class="section-title">📚 My Courses</h2>
+            <div class="courses-grid">
+                <div class="course-card">
+                    <div class="course-header">
+                        <div class="course-code">CS101</div>
+                        <div class="course-name">Data Structures & Algorithms</div>
+                    </div>
+                    <div class="course-body">
+                        <div class="course-stat">
+                            <span>👥 Students Enrolled</span>
+                            <span>45</span>
+                        </div>
+                        <div class="course-stat">
+                            <span>❓ Pending Doubts</span>
+                            <span>3</span>
+                        </div>
+                        <div class="course-stat">
+                            <span>✅ Active Quizzes</span>
+                            <span>2</span>
+                        </div>
+                        <div class="course-actions">
+                            <button class="btn btn-primary">Manage</button>
+                            <button class="btn btn-outline">View</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="course-card">
+                    <div class="course-header">
+                        <div class="course-code">CS102</div>
+                        <div class="course-name">Database Management Systems</div>
+                    </div>
+                    <div class="course-body">
+                        <div class="course-stat">
+                            <span>👥 Students Enrolled</span>
+                            <span>38</span>
+                        </div>
+                        <div class="course-stat">
+                            <span>❓ Pending Doubts</span>
+                            <span>5</span>
+                        </div>
+                        <div class="course-stat">
+                            <span>✅ Active Quizzes</span>
+                            <span>3</span>
+                        </div>
+                        <div class="course-actions">
+                            <button class="btn btn-primary">Manage</button>
+                            <button class="btn btn-outline">View</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="course-card">
+                    <div class="course-header">
+                        <div class="course-code">CS201</div>
+                        <div class="course-name">Advanced Algorithms</div>
+                    </div>
+                    <div class="course-body">
+                        <div class="course-stat">
+                            <span>👥 Students Enrolled</span>
+                            <span>32</span>
+                        </div>
+                        <div class="course-stat">
+                            <span>❓ Pending Doubts</span>
+                            <span>0</span>
+                        </div>
+                        <div class="course-stat">
+                            <span>✅ Active Quizzes</span>
+                            <span>4</span>
+                        </div>
+                        <div class="course-actions">
+                            <button class="btn btn-primary">Manage</button>
+                            <button class="btn btn-outline">View</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="section-title">
+                <span>❓ Pending Doubts</span>
+                <button class="btn btn-success">Answer All</button>
+            </h2>
+            <div class="list-container">
+                <div class="list-item">
+                    <div class="list-item-info">
+                        <h4>How to implement a balanced BST?</h4>
+                        <div class="list-item-meta">CS101 • Asked by John Doe • 2 hours ago</div>
+                    </div>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <span class="badge badge-urgent">Urgent</span>
+                        <button class="btn btn-success">Answer</button>
+                    </div>
+                </div>
+
+                <div class="list-item">
+                    <div class="list-item-info">
+                        <h4>Difference between clustered and non-clustered index?</h4>
+                        <div class="list-item-meta">CS102 • Asked by Jane Smith • 5 hours ago</div>
+                    </div>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <span class="badge badge-pending">Pending</span>
+                        <button class="btn btn-success">Answer</button>
+                    </div>
+                </div>
+
+                <div class="list-item">
+                    <div class="list-item-info">
+                        <h4>Time complexity of Dijkstra's algorithm?</h4>
+                        <div class="list-item-meta">CS201 • Asked by Mike Brown • Yesterday</div>
+                    </div>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <span class="badge badge-pending">Pending</span>
+                        <button class="btn btn-success">Answer</button>
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="section-title">📊 Recent Quiz Activity</h2>
+            <div class="list-container">
+                <div class="list-item">
+                    <div class="list-item-info">
+                        <h4>Sorting Algorithms Quiz</h4>
+                        <div class="list-item-meta">CS101 • 35 submissions • Avg Score: 82%</div>
+                    </div>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <span class="badge badge-active">Active</span>
+                        <button class="btn btn-outline">View Results</button>
+                    </div>
+                </div>
+
+                <div class="list-item">
+                    <div class="list-item-info">
+                        <h4>SQL Joins Test</h4>
+                        <div class="list-item-meta">CS102 • 28 submissions • Avg Score: 76%</div>
+                    </div>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <span class="badge badge-active">Active</span>
+                        <button class="btn btn-outline">View Results</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
