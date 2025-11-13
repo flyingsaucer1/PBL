@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - Academic Knowledge Hub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #4A90E2;
+            --accent-color: #7ED321;
+            --danger-color: #E74C3C;
+            --warning-color: #F39C12;
+            --bg-color: #F5F7FA;
+            --card-bg: #FFFFFF;
+            --text-dark: #2C3E50;
+            --text-light: #7F8C8D;
+            --border-color: #E1E8ED;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+        }
+
+        /* Top Navigation */
+        .top-nav {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        /* Main Layout */
+        .main-container {
+            display: flex;
+            min-height: calc(100vh - 70px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: var(--card-bg);
+            padding: 2rem 0;
+            box-shadow: 2px 0 4px rgba(0,0,0,0.05);
+        }
+
+        .nav-item {
+            padding: 1rem 2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .nav-item.active {
+            background: var(--bg-color);
+            border-left-color: var(--primary-color);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        /* Dashboard Content */
+        .dashboard-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .welcome-section {
+            margin-bottom: 2rem;
+        }
+
+        .welcome-section h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-section p {
+            color: var(--text-light);
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--text-dark);
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Section Title */
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+
+        /* Course Cards */
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .course-card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.3s;
+        }
+
+        .course-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .course-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            padding: 1.5rem;
+        }
+
+        .course-code {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .course-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 0.5rem;
+        }
+
+        .course-body {
+            padding: 1.5rem;
+        }
+
+        .faculty-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .progress-bar {
+            background: var(--bg-color);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent-color);
+            transition: width 0.3s;
+        }
+
+        .course-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #3A7BC8;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* Quiz & Doubt Lists */
+        .list-container {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+        }
+
+        .list-item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .list-item-info h4 {
+            margin-bottom: 0.5rem;
+        }
+
+        .list-item-meta {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .badge-pending {
+            background: #FFF3CD;
+            color: #856404;
+        }
+
+        .badge-answered {
+            background: #D4EDDA;
+            color: #155724;
+        }
+
+        .badge-upcoming {
+            background: #CCE5FF;
+            color: #004085;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                padding: 1rem 0;
+            }
+
+            .dashboard-content {
+                padding: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .courses-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div class="logo">🎓 Academic Hub</div>
+        <div class="user-info">
+            <span>Apeksha</span>
+            <div class="user-avatar">Ap</div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="nav-item active">📊 Dashboard</div>
+            <div class="nav-item">📚 My Courses</div>
+            <div class="nav-item">📝 Syllabus</div>
+            <div class="nav-item">📖 Notes</div>
+            <div class="nav-item">❓ Ask Doubt</div>
+            <div class="nav-item">✅ Quizzes</div>
+            <div class="nav-item">💬 Community</div>
+            <div class="nav-item">👤 Profile</div>
+        </aside>
+
+        <!-- Dashboard Content -->
+        <main class="dashboard-content">
+            <!-- Welcome Section -->
+            <div class="welcome-section">
+                <h1>Welcome back, Apeksha! 👋</h1>
+                <p>Here's what's happening with your courses today</p>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-number">6</div>
+                            <div class="stat-label">Enrolled Courses</div>
+                        </div>
+                        <div class="stat-icon" style="background: #E3F2FD; color: var(--primary-color);">📚</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-number">3</div>
+                            <div class="stat-label">Pending Quizzes</div>
+                        </div>
+                        <div class="stat-icon" style="background: #FFF3E0; color: var(--warning-color);">✅</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-number">5</div>
+                            <div class="stat-label">Active Doubts</div>
+                        </div>
+                        <div class="stat-icon" style="background: #F3E5F5; color: #9C27B0;">❓</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-number">85%</div>
+                            <div class="stat-label">Avg Quiz Score</div>
+                        </div>
+                        <div class="stat-icon" style="background: #E8F5E9; color: var(--accent-color);">🎯</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Courses -->
+            <h2 class="section-title">📚 My Courses</h2>
+            <div class="courses-grid">
+                <div class="course-card">
+                    <div class="course-header">
+                        <div class="course-code">CS101</div>
+                        <div class="course-name">Data Structures & Algorithms</div>
+                    </div>
+                    <div class="course-body">
+                        <div class="faculty-info">👨‍🏫 Prof. Sarah Johnson</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 75%"></div>
+                        </div>
+                        <div style="margin-bottom: 1rem; color: var(--text-light); font-size: 0.9rem;">Progress: 75%</div>
+                        <div class="course-actions">
+                            <button class="btn btn-primary">View Course</button>
+                            <button class="btn btn-outline">Materials</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="course-card">
+                    <div class="course-header">
+                        <div class="course-code">CS102</div>
+                        <div class="course-name">Database Management Systems</div>
+                    </div>
+                    <div class="course-body">
+                        <div class="faculty-info">👨‍🏫 Prof. Michael Chen</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 60%"></div>
+                        </div>
+                        <div style="margin-bottom: 1rem; color: var(--text-light); font-size: 0.9rem;">Progress: 60%</div>
+                        <div class="course-actions">
+                            <button class="btn btn-primary">View Course</button>
+                            <button class="btn btn-outline">Materials</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="course-card">
+                    <div class="course-header">
+                        <div class="course-code">CS103</div>
+                        <div class="course-name">Web Development</div>
+                    </div>
+                    <div class="course-body">
+                        <div class="faculty-info">👩‍🏫 Prof. Emily Rodriguez</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 90%"></div>
+                        </div>
+                        <div style="margin-bottom: 1rem; color: var(--text-light); font-size: 0.9rem;">Progress: 90%</div>
+                        <div class="course-actions">
+                            <button class="btn btn-primary">View Course</button>
+                            <button class="btn btn-outline">Materials</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Quizzes -->
+            <h2 class="section-title">📝 Recent Quizzes</h2>
+            <div class="list-container">
+                <div class="list-item">
+                    <div class="list-item-info">
+                        <h4>Sorting Algorithms Quiz</h4>
+                        <div class="list-item-meta">CS101 • Due: Nov 15, 2025</div>
+                    </div>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <span class="badge badge-upcoming">Upcoming</span>
+                        <button class="btn btn-primary">Start Quiz</button>
+                    </div>
+                </div>
+
+                <div class="list-item">
+                    <div class="list-item-info">
+                        <h4>SQL Basics Test</h4>
+                        <div class="list-item-meta">CS102 • Due: Nov 13, 2025</div>
+                    </div>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <span class="badge badge-upcoming">Upcoming</span>
+                        <button class="btn btn-primary">Start Quiz</button>
+                    </div>
+                </div>
+
+                <div class="list-item">
+                    <div class="list-item-info">
+                        <h4>HTML & CSS Quiz</h4>
+                        <div class="list-item-meta">CS103 • Completed: Nov 10, 2025</div>
+                    </div>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <span style="font-weight: bold; color: var(--accent-color);">Score: 92%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Doubts -->
+            <h2 class="section-title">💭 My Doubts</h2>
+            <div class="list-container">
+                <div class="list-item">
+                    <div class="list-item-info">
+                        <h4>How to optimize binary search tree?</h4>
+                        <div class="list-item-meta">CS101 • Asked 2 hours ago</div>
+                    </div>
+                    <span class="badge badge-pending">Pending</span>
+                </div>
+
+                <div class="list-item">
+                    <div class="list-item-info">
+                        <h4>Difference between INNER and OUTER JOIN?</h4>
+                        <div class="list-item-meta">CS102 • Answered by Prof. Chen</div>
+                    </div>
+                    <span class="badge badge-answered">Answered</span>
+                </div>
+
+                <div class="list-item">
+                    <div class="list-item-info">
+                        <h4>Best practices for responsive design?</h4>
+                        <div class="list-item-meta">CS103 • Asked yesterday</div>
+                    </div>
+                    <span class="badge badge-pending">Pending</span>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Navigation functionality
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
