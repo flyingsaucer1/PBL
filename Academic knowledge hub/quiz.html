@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Quiz Management System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        body {
+            background: #f3f4f6;
+            color: #111827;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 999px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            font-size: 0.75rem;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
+            margin-bottom: 20px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            border: none;
+            background: #e5e7eb;
+            padding: 8px 16px;
+            border-radius: 999px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            background: #2563eb;
+            color: white;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        input[type="text"], input[type="number"], textarea {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 10px;
+            border: 1px solid #d1d5db;
+            font-size: 0.9rem;
+            outline: none;
+            background: #f9fafb;
+        }
+
+        input:focus, textarea:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+            background: white;
+        }
+
+        .btn-primary {
+            padding: 8px 16px;
+            border-radius: 999px;
+            border: none;
+            background: #2563eb;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .question-builder {
+            border: 2px dashed #d1d5db;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+
+        .question-item {
+            background: #f9fafb;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid #2563eb;
+        }
+
+        .quiz-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+        }
+
+        .quiz-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .quiz-option {
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border: 2px solid #e5e7eb;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quiz-option:hover {
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+
+        .quiz-option.selected {
+            border-color: #2563eb;
+            background: #dbeafe;
+        }
+
+        .quiz-option.correct {
+            border-color: #16a34a;
+            background: #d1fae5;
+        }
+
+        .quiz-option.wrong {
+            border-color: #dc2626;
+            background: #fee2e2;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            color: white;
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .result-score {
+            font-size: 3rem;
+            font-weight: 700;
+        }
+
+        @media (max-width: 640px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <div>
+            <h1>✅ Quiz Management System</h1>
+            <span>Create quizzes and take tests</span>
+        </div>
+        <span class="badge">Module: quiz.c</span>
+    </header>
+
+    <div class="card">
+        <div class="tabs">
+            <button class="tab-btn active" data-target="tab-create">Create Quiz</button>
+            <button class="tab-btn" data-target="tab-view">View Quizzes</button>
+            <button class="tab-btn" data-target="tab-take">Take Quiz</button>
+        </div>
+
+        <!-- Create Quiz -->
+        <section id="tab-create" class="section active">
+            <h2 style="font-size:1.1rem;margin-bottom:10px;">📝 Create New Quiz</h2>
+            <form id="createQuizForm">
+                <div class="form-group">
+                    <label>Quiz Title/Subject *</label>
+                    <input type="text" id="quizTitle" required placeholder="Enter quiz title">
+                </div>
+                <div class="form-group">
+                    <label>Number of Questions *</label>
+                    <input type="number" id="numQuestions" min="1" max="20" value="3" required>
+                </div>
+                <button type="button" class="btn-primary" id="startBuildingBtn">Start Building Questions</button>
+            </form>
+
+            <div id="questionBuilder" style="display:none;margin-top:20px;">
+                <h3 style="margin-bottom:10px;">Add Questions</h3>
+                <div id="questionsContainer"></div>
+                <button type="button" class="btn-primary" id="saveQuizBtn">💾 Save Quiz</button>
+                <div id="createStatus" style="margin-top:10px;font-size:0.9rem;"></div>
+            </div>
+        </section>
+
+        <!-- View Quizzes -->
+        <section id="tab-view" class="section">
+            <h2 style="font-size:1.1rem;margin-bottom:10px;">📚 Available Quizzes</h2>
+            <div id="quizzesContainer"></div>
+            <div id="quizzesEmpty" style="text-align:center;padding:20px;color:#6b7280;">
+                No quizzes created yet.
+            </div>
+        </section>
+
+        <!-- Take Quiz -->
+        <section id="tab-take" class="section">
+            <h2 style="font-size:1.1rem;margin-bottom:10px;">🎯 Take a Quiz</h2>
+            <div id="quizSelection"></div>
+            <div id="quizTest" style="display:none;">
+                <div id="quizHeader"></div>
+                <div id="quizQuestions"></div>
+                <button type="button" class="btn-primary" id="submitQuizBtn" style="margin-top:15px;">Submit Quiz</button>
+            </div>
+            <div id="quizResult" style="display:none;"></div>
+        </section>
+    </div>
+</div>
+
+<script>
+    const quizzes = [];
+    let currentQuizForTest = null;
+    let userAnswers = [];
+
+    // Tabs
+    const tabButtons = document.querySelectorAll(".tab-btn");
+    const sections = document.querySelectorAll(".section");
+
+    tabButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            const targetId = btn.getAttribute("data-target");
+            tabButtons.forEach(b => b.classList.remove("active"));
+            sections.forEach(sec => sec.classList.remove("active"));
+            btn.classList.add("active");
+            document.getElementById(targetId).classList.add("active");
+
+            if (targetId === "tab-view") renderQuizzesList();
+            if (targetId === "tab-take") renderQuizSelection();
+        });
+    });
+
+    // Create Quiz - Start Building
+    document.getElementById("startBuildingBtn").addEventListener("click", () => {
+        const title = document.getElementById("quizTitle").value.trim();
+        const num = parseInt(document.getElementById("numQuestions").value);
+
+        if (!title || num < 1) {
+            alert("Please enter valid quiz details");
+            return;
+        }
+
+        buildQuestionForms(num);
+        document.getElementById("questionBuilder").style.display = "block";
+    });
+
+    function buildQuestionForms(count) {
+        const container = document.getElementById("questionsContainer");
+        container.innerHTML = "";
+
+        for (let i = 0; i < count; i++) {
+            const qDiv = document.createElement("div");
+            qDiv.className = "question-builder";
+            qDiv.innerHTML = `
+                <h4 style="margin-bottom:8px;">Question ${i + 1}</h4>
+                <div class="form-group">
+                    <label>Question Text *</label>
+                    <input type="text" id="q${i}_text" required placeholder="Enter question">
+                </div>
+                <div class="form-group">
+                    <label>Option A *</label>
+                    <input type="text" id="q${i}_a" required>
+                </div>
+                <div class="form-group">
+                    <label>Option B *</label>
+                    <input type="text" id="q${i}_b" required>
+                </div>
+                <div class="form-group">
+                    <label>Option C *</label>
+                    <input type="text" id="q${i}_c" required>
+                </div>
+                <div class="form-group">
+                    <label>Option D *</label>
+                    <input type="text" id="q${i}_d" required>
+                </div>
+                <div class="form-group">
+                    <label>Correct Answer (A/B/C/D) *</label>
+                    <input type="text" id="q${i}_correct" required maxlength="1" placeholder="A, B, C, or D">
+                </div>
+            `;
+            container.appendChild(qDiv);
+        }
+    }
+
+    // Save Quiz
+    document.getElementById("saveQuizBtn").addEventListener("click", () => {
+        const title = document.getElementById("quizTitle").value.trim();
+        const num = parseInt(document.getElementById("numQuestions").value);
+
+        const questions = [];
+        for (let i = 0; i < num; i++) {
+            const q = {
+                question: document.getElementById(`q${i}_text`).value.trim(),
+                optionA: document.getElementById(`q${i}_a`).value.trim(),
+                optionB: document.getElementById(`q${i}_b`).value.trim(),
+                optionC: document.getElementById(`q${i}_c`).value.trim(),
+                optionD: document.getElementById(`q${i}_d`).value.trim(),
+                correct: document.getElementById(`q${i}_correct`).value.trim().toUpperCase()
+            };
+
+            if (!q.question || !q.optionA || !q.optionB || !q.optionC || !q.optionD || !["A","B","C","D"].includes(q.correct)) {
+                alert(`Please complete Question ${i + 1} correctly`);
+                return;
+            }
+            questions.push(q);
+        }
+
+        quizzes.push({ title, totalQuestions: num, questions });
+        document.getElementById("createStatus").innerHTML = `<span style="color:#16a34a;">✅ Quiz "${title}" created successfully!</span>`;
+        document.getElementById("createQuizForm").reset();
+        document.getElementById("questionBuilder").style.display = "none";
+    });
+
+    // View Quizzes
+    function renderQuizzesList() {
+        const container = document.getElementById("quizzesContainer");
+        const empty = document.getElementById("quizzesEmpty");
+        container.innerHTML = "";
+
+        if (quizzes.length === 0) {
+            empty.style.display = "block";
+            return;
+        }
+        empty.style.display = "none";
+
+        quizzes.forEach((quiz, idx) => {
+            const card = document.createElement("div");
+            card.className = "quiz-card";
+            card.innerHTML = `
+                <div class="quiz-title">${idx + 1}. ${escapeHtml(quiz.title)}</div>
+                <div style="font-size:0.85rem;color:#6b7280;">📝 Total Questions: ${quiz.totalQuestions}</div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    // Take Quiz - Selection
+    function renderQuizSelection() {
+        const container = document.getElementById("quizSelection");
+        container.innerHTML = "";
+
+        if (quizzes.length === 0) {
+            container.innerHTML = `<div style="text-align:center;padding:20px;color:#6b7280;">No quizzes available. Create one first!</div>`;
+            return;
+        }
+
+        const select = document.createElement("select");
+        select.style.cssText = "width:100%;padding:10px;border-radius:10px;border:1px solid #d1d5db;font-size:0.9rem;margin-bottom:15px;";
+        select.innerHTML = `<option value="">-- Select a Quiz --</option>`;
+        quizzes.forEach((quiz, idx) => {
+            const opt = document.createElement("option");
+            opt.value = idx;
+            opt.textContent = quiz.title;
+            select.appendChild(opt);
+        });
+
+        const btn = document.createElement("button");
+        btn.className = "btn-primary";
+        btn.textContent = "Start Quiz";
+        btn.onclick = () => {
+            const idx = parseInt(select.value);
+            if (isNaN(idx)) {
+                alert("Please select a quiz");
+                return;
+            }
+            startQuizTest(idx);
+        };
+
+        container.appendChild(select);
+        container.appendChild(btn);
+    }
+
+    // Start Quiz Test
+    function startQuizTest(quizIndex) {
+        currentQuizForTest = quizzes[quizIndex];
+        userAnswers = new Array(currentQuizForTest.questions.length).fill(null);
+
+        document.getElementById("quizSelection").style.display = "none";
+        document.getElementById("quizTest").style.display = "block";
+        document.getElementById("quizResult").style.display = "none";
+
+        const header = document.getElementById("quizHeader");
+        header.innerHTML = `<h2 style="margin-bottom:15px;">${escapeHtml(currentQuizForTest.title)}</h2>`;
+
+        const qContainer = document.getElementById("quizQuestions");
+        qContainer.innerHTML = "";
+
+        currentQuizForTest.questions.forEach((q, i) => {
+            const qCard = document.createElement("div");
+            qCard.className = "quiz-card";
+            qCard.innerHTML = `
+                <div style="font-weight:600;margin-bottom:10px;">Q${i + 1}: ${escapeHtml(q.question)}</div>
+                <div class="quiz-option" data-q="${i}" data-opt="A">A) ${escapeHtml(q.optionA)}</div>
+                <div class="quiz-option" data-q="${i}" data-opt="B">B) ${escapeHtml(q.optionB)}</div>
+                <div class="quiz-option" data-q="${i}" data-opt="C">C) ${escapeHtml(q.optionC)}</div>
+                <div class="quiz-option" data-q="${i}" data-opt="D">D) ${escapeHtml(q.optionD)}</div>
+            `;
+            qContainer.appendChild(qCard);
+        });
+
+        // Option selection
+        document.querySelectorAll(".quiz-option").forEach(opt => {
+            opt.addEventListener("click", function() {
+                const qIdx = parseInt(this.dataset.q);
+                const choice = this.dataset.opt;
+
+                document.querySelectorAll(`.quiz-option[data-q="${qIdx}"]`).forEach(o => o.classList.remove("selected"));
+                this.classList.add("selected");
+                userAnswers[qIdx] = choice;
+            });
+        });
+    }
+
+    // Submit Quiz
+    document.getElementById("submitQuizBtn").addEventListener("click", () => {
+        if (!currentQuizForTest) return;
+
+        let score = 0;
+        currentQuizForTest.questions.forEach((q, i) => {
+            if (userAnswers[i] === q.correct) score++;
+
+            // Mark correct/wrong
+            document.querySelectorAll(`.quiz-option[data-q="${i}"]`).forEach(opt => {
+                opt.style.pointerEvents = "none";
+                if (opt.dataset.opt === q.correct) {
+                    opt.classList.add("correct");
+                } else if (opt.dataset.opt === userAnswers[i]) {
+                    opt.classList.add("wrong");
+                }
+            });
+        });
+
+        const percentage = ((score / currentQuizForTest.questions.length) * 100).toFixed(2);
+
+        const resultDiv = document.getElementById("quizResult");
+        resultDiv.style.display = "block";
+        resultDiv.innerHTML = `
+            <div class="result-card">
+                <div style="font-size:1.2rem;margin-bottom:10px;">🎉 Quiz Completed!</div>
+                <div class="result-score">${score}/${currentQuizForTest.questions.length}</div>
+                <div style="font-size:1.5rem;margin-top:10px;">${percentage}%</div>
+                <button class="btn-primary" onclick="resetQuiz()" style="margin-top:20px;background:white;color:#2563eb;">Take Another Quiz</button>
+            </div>
+        `;
+
+        document.getElementById("submitQuizBtn").style.display = "none";
+    });
+
+    function resetQuiz() {
+        document.getElementById("quizSelection").style.display = "block";
+        document.getElementById("quizTest").style.display = "none";
+        document.getElementById("quizResult").style.display = "none";
+        document.getElementById("submitQuizBtn").style.display = "block";
+        currentQuizForTest = null;
+        userAnswers = [];
+        renderQuizSelection();
+    }
+
+    function escapeHtml(text) {
+        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+</script>
+</body>
+</html>
