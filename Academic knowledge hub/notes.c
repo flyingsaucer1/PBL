@@ -2,7 +2,6 @@
 // FILE: notes.c
 // Notes Management - Complete Implementation
 // ============================================
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,6 +18,10 @@ typedef struct Note {
 } Note;
 
 Note* notesListHead = NULL;
+
+// =======================
+// Internal helpers
+// =======================
 
 void loadNotes() {
     FILE* fp = fopen(NOTES_FILE, "r");
@@ -50,6 +53,7 @@ void loadNotes() {
         token = strtok(NULL, "|");
         if (token) {
             strncpy(newNote->faculty, token, 49);
+            newNote->faculty[49] = '\0';
             newNote->faculty[strcspn(newNote->faculty, "\n")] = 0;
         }
 
@@ -79,37 +83,88 @@ void saveAllNotes() {
     fclose(fp);
 }
 
-void uploadNote() {
+// ===================================
+// New helper for web API / programmatic calls
+// ===================================
+void addNoteFromData(const char* title,
+                     const char* subject,
+                     const char* content,
+                     const char* faculty) {
     Note* newNote = (Note*)malloc(sizeof(Note));
     if (!newNote) {
-        printf("\n Memory allocation failed!\n");
+        printf(" Memory allocation failed!\n");
         return;
     }
+
+    strncpy(newNote->title, title, sizeof(newNote->title) - 1);
+    newNote->title[sizeof(newNote->title) - 1] = '\0';
+
+    strncpy(newNote->subject, subject, sizeof(newNote->subject) - 1);
+    newNote->subject[sizeof(newNote->subject) - 1] = '\0';
+
+    strncpy(newNote->content, content, sizeof(newNote->content) - 1);
+    newNote->content[sizeof(newNote->content) - 1] = '\0';
+
+    strncpy(newNote->faculty, faculty, sizeof(newNote->faculty) - 1);
+    newNote->faculty[sizeof(newNote->faculty) - 1] = '\0';
+
+    newNote->next = notesListHead;
+    notesListHead = newNote;
+
+    saveAllNotes();
+}
+
+// ===================================
+// New helper to print all notes as JSON
+// (used by notes_api.c)
+// ===================================
+void printAllNotesAsJson() {
+    Note* temp = notesListHead;
+    printf("[\n");
+    int first = 1;
+    while (temp) {
+        if (!first) {
+            printf(",\n");
+        }
+        first = 0;
+
+        // NOTE: This is a simple JSON printer. Avoid using quotes in your data.
+        printf("  {\"title\":\"%s\",\"subject\":\"%s\",\"content\":\"%s\",\"faculty\":\"%s\"}",
+               temp->title, temp->subject, temp->content, temp->faculty);
+
+        temp = temp->next;
+    }
+    printf("\n]\n");
+}
+
+// =======================
+// Original console functions
+// =======================
+
+void uploadNote() {
+    char title[100], subject[50], content[500], faculty[50];
 
     printf("\n========================================\n");
     printf("      UPLOAD NOTE/LECTURE\n");
     printf("========================================\n");
     
     printf("Enter Title: ");
-    fgets(newNote->title, sizeof(newNote->title), stdin);
-    newNote->title[strcspn(newNote->title, "\n")] = 0;
+    fgets(title, sizeof(title), stdin);
+    title[strcspn(title, "\n")] = 0;
     
     printf("Enter Subject: ");
-    fgets(newNote->subject, sizeof(newNote->subject), stdin);
-    newNote->subject[strcspn(newNote->subject, "\n")] = 0;
+    fgets(subject, sizeof(subject), stdin);
+    subject[strcspn(subject, "\n")] = 0;
     
     printf("Enter Content/Description: ");
-    fgets(newNote->content, sizeof(newNote->content), stdin);
-    newNote->content[strcspn(newNote->content, "\n")] = 0;
+    fgets(content, sizeof(content), stdin);
+    content[strcspn(content, "\n")] = 0;
     
     printf("Enter Faculty Name: ");
-    fgets(newNote->faculty, sizeof(newNote->faculty), stdin);
-    newNote->faculty[strcspn(newNote->faculty, "\n")] = 0;
+    fgets(faculty, sizeof(faculty), stdin);
+    faculty[strcspn(faculty, "\n")] = 0;
 
-    newNote->next = notesListHead;
-    notesListHead = newNote;
-
-    saveAllNotes();
+    addNoteFromData(title, subject, content, faculty);
     
     printf("\n✅ Note uploaded successfully!\n");
 }
@@ -153,6 +208,7 @@ void searchNoteBySubject() {
     printf("========================================\n");
 
     while (temp) {
+        // strcasecmp may be different on Windows; adjust if needed.
         if (strcasecmp(temp->subject, subject) == 0) {
             found = 1;
             printf("\n%d. Title: %s\n", count, temp->title);
