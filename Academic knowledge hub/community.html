@@ -1,704 +1,281 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Community Module - Posts & Comments</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        }
-
-        body {
-            background: #f3f4f6;
-            color: #111827;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-        }
-
-        header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            gap: 10px;
-        }
-
-        header h1 {
-            font-size: 1.8rem;
-            font-weight: 700;
-        }
-
-        header span {
-            font-size: 0.9rem;
-            color: #6b7280;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 999px;
-            background: #eff6ff;
-            color: #1d4ed8;
-            font-size: 0.75rem;
-        }
-
-        .card {
-            background: #ffffff;
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
-            margin-bottom: 20px;
-        }
-
-        .user-bar {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 15px;
-            font-size: 0.9rem;
-        }
-
-        .user-bar input {
-            padding: 6px 10px;
-            border-radius: 999px;
-            border: 1px solid #d1d5db;
-            background: #f9fafb;
-            outline: none;
-            font-size: 0.85rem;
-        }
-
-        .user-bar input:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
-            background: #ffffff;
-        }
-
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        }
-
-        .tab-btn {
-            border: none;
-            background: #e5e7eb;
-            padding: 8px 16px;
-            border-radius: 999px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .tab-btn.active {
-            background: #2563eb;
-            color: #ffffff;
-        }
-
-        .tab-btn:hover {
-            background: #d1d5db;
-        }
-
-        .section {
-            display: none;
-        }
-
-        .section.active {
-            display: block;
-        }
-
-        .form-group {
-            margin-bottom: 12px;
-        }
-
-        label {
-            display: block;
-            font-size: 0.9rem;
-            margin-bottom: 4px;
-            font-weight: 600;
-        }
-
-        input[type="text"],
-        textarea {
-            width: 100%;
-            padding: 8px 10px;
-            border-radius: 10px;
-            border: 1px solid #d1d5db;
-            font-size: 0.9rem;
-            outline: none;
-            background: #f9fafb;
-            transition: border 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-        }
-
-        input[type="text"]:focus,
-        textarea:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
-            background: #ffffff;
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 90px;
-        }
-
-        .btn-primary {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 16px;
-            border-radius: 999px;
-            border: none;
-            background: #2563eb;
-            color: white;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
-        }
-
-        .btn-primary:hover {
-            background: #1d4ed8;
-            box-shadow: 0 8px 18px rgba(37, 99, 235, 0.35);
-            transform: translateY(-1px);
-        }
-
-        .btn-primary:active {
-            transform: translateY(0);
-            box-shadow: none;
-        }
-
-        .btn-secondary {
-            border: none;
-            background: transparent;
-            color: #6b7280;
-            font-size: 0.85rem;
-            cursor: pointer;
-            margin-left: 10px;
-        }
-
-        .btn-link {
-            border: none;
-            background: transparent;
-            color: #2563eb;
-            font-size: 0.8rem;
-            cursor: pointer;
-            padding: 0;
-        }
-
-        .status {
-            margin-top: 8px;
-            font-size: 0.85rem;
-        }
-
-        .status.success {
-            color: #16a34a;
-        }
-
-        .status.error {
-            color: #dc2626;
-        }
-
-        .posts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 16px;
-        }
-
-        .post-card {
-            background: #ffffff;
-            border-radius: 14px;
-            padding: 14px 16px;
-            border: 1px solid #e5e7eb;
-            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .post-title {
-            font-size: 1rem;
-            font-weight: 700;
-            color: #111827;
-        }
-
-        .post-meta {
-            font-size: 0.8rem;
-            color: #6b7280;
-        }
-
-        .post-content-preview {
-            font-size: 0.88rem;
-            color: #374151;
-            margin-top: 4px;
-        }
-
-        .pill {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 999px;
-            background: #f3f4f6;
-            font-size: 0.75rem;
-            margin-right: 6px;
-        }
-
-        .pill-blue {
-            background: #eff6ff;
-            color: #1d4ed8;
-        }
-
-        .empty-state {
-            padding: 20px;
-            text-align: center;
-            font-size: 0.9rem;
-            color: #6b7280;
-        }
-
-        .search-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .search-row input {
-            flex: 1;
-        }
-
-        /* Detail modal */
-        .modal-backdrop {
-            position: fixed;
-            inset: 0;
-            background: rgba(15, 23, 42, 0.45);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 16px;
-            z-index: 20;
-        }
-
-        .modal-backdrop.active {
-            display: flex;
-        }
-
-        .modal {
-            max-width: 700px;
-            width: 100%;
-            background: #ffffff;
-            border-radius: 18px;
-            padding: 18px 20px;
-            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.35);
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .modal-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-        }
-
-        .modal-close {
-            border: none;
-            background: transparent;
-            font-size: 1.2rem;
-            line-height: 1;
-            cursor: pointer;
-            color: #6b7280;
-        }
-
-        .modal-section-title {
-            font-size: 0.95rem;
-            font-weight: 600;
-            margin-top: 10px;
-            margin-bottom: 4px;
-        }
-
-        .comment-list {
-            margin-top: 6px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .comment-item {
-            padding: 8px 10px;
-            border-radius: 10px;
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
-        }
-
-        .comment-meta {
-            font-size: 0.8rem;
-            color: #6b7280;
-            margin-bottom: 2px;
-            font-weight: 500;
-        }
-
-        .comment-text {
-            font-size: 0.88rem;
-            color: #374151;
-            white-space: pre-wrap;
-        }
-
-        @media (max-width: 640px) {
-            header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .modal {
-                max-height: 85vh;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Community - Academic Knowledge Hub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: system-ui, sans-serif; background:#f3f4f6; margin:0; padding:20px; }
+    .container { max-width: 1000px; margin: 0 auto; }
+    h1 { margin-bottom: 4px; }
+    .subtitle { color:#6b7280; font-size:0.9rem; margin-bottom:16px; }
+    .row { display:flex; flex-wrap:wrap; gap:16px; }
+    .card { background:#fff; padding:16px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.05); flex:1; min-width:280px; }
+    label { display:block; margin:6px 0 2px; font-size:0.9rem; }
+    input, textarea { width:100%; padding:6px 8px; border-radius:8px; border:1px solid #d1d5db; font-size:0.9rem; }
+    textarea { min-height:70px; resize:vertical; }
+    button { margin-top:8px; padding:8px 14px; border-radius:999px; border:none; background:#2563eb; color:#fff; cursor:pointer; font-size:0.9rem; }
+    button:hover { background:#1d4ed8; }
+    .status { margin-top:6px; font-size:0.85rem; }
+    .status.ok { color:#16a34a; }
+    .status.err { color:#dc2626; }
+    .post-list { display:flex; flex-direction:column; gap:8px; max-height:400px; overflow-y:auto; }
+    .post-item { padding:8px; border-radius:8px; border:1px solid #e5e7eb; background:#fff; cursor:pointer; }
+    .post-item:hover { background:#eff6ff; }
+    .post-title { font-weight:600; }
+    .post-meta { font-size:0.8rem; color:#6b7280; }
+    .post-content { font-size:0.9rem; margin-top:2px; }
+    .badge { display:inline-block; padding:2px 6px; border-radius:999px; background:#eff6ff; color:#1d4ed8; font-size:0.75rem; margin-left:4px; }
+    .comments { margin-top:8px; border-top:1px solid #e5e7eb; padding-top:8px; max-height:220px; overflow-y:auto; }
+    .comment { padding:6px 0; border-bottom:1px solid #f3f4f6; }
+    .comment-author { font-weight:600; font-size:0.85rem; }
+    .comment-text { font-size:0.85rem; }
+    .empty { font-size:0.85rem; color:#6b7280; margin-top:4px; }
+  </style>
 </head>
 <body>
 <div class="container">
-    <header>
-        <div>
-            <h1>Community Module</h1>
-            <span>Share posts, view the feed, and add comments</span>
-        </div>
-        <span class="badge">Module: community.c</span>
-    </header>
+  <h1>Community</h1>
+  <div class="subtitle">
+    Powered by your C backend via Node at <code>http://localhost:3000</code>
+  </div>
 
-    <div class="card">
-        <!-- Username bar -->
-        <div class="user-bar">
-            <span>Current user:</span>
-            <input type="text" id="usernameInput" placeholder="Enter your username" />
-            <button class="btn-primary" id="setUsernameBtn">Set</button>
-            <span id="currentUserLabel" style="color:#6b7280;">(default: Guest)</span>
-        </div>
+  <div class="row">
+    <!-- Left: create post + list -->
+    <div class="card" style="flex:1.1;">
+      <h2 style="margin-top:0;">Create New Post</h2>
+      <form id="postForm">
+        <label for="postTitle">Title *</label>
+        <input id="postTitle" required>
 
-        <!-- Tabs -->
-        <div class="tabs">
-            <button class="tab-btn active" data-target="tab-create">Create Post</button>
-            <button class="tab-btn" data-target="tab-feed">Community Feed</button>
-        </div>
+        <label for="postAuthor">Author *</label>
+        <input id="postAuthor" required value="Aishika">
 
-        <!-- Create Post -->
-        <section id="tab-create" class="section active">
-            <h2 style="font-size:1.1rem;margin-bottom:10px;">Create a New Post</h2>
-            <form id="createPostForm">
-                <div class="form-group">
-                    <label for="postTitleInput">Post Title *</label>
-                    <input type="text" id="postTitleInput" required placeholder="Enter a title for your post">
-                </div>
-                <div class="form-group">
-                    <label for="postContentInput">Post Content *</label>
-                    <textarea id="postContentInput" required placeholder="Write your post content here"></textarea>
-                </div>
-                <button type="submit" class="btn-primary">Publish Post</button>
-                <button type="button" class="btn-secondary" id="clearPostFormBtn">Clear</button>
-                <div id="createPostStatus" class="status"></div>
-            </form>
-        </section>
+        <label for="postContent">Content *</label>
+        <textarea id="postContent" required></textarea>
 
-        <!-- Community Feed -->
-        <section id="tab-feed" class="section">
-            <h2 style="font-size:1.1rem;margin-bottom:10px;">Community Feed</h2>
-            <div id="postsContainer" class="posts-grid"></div>
-            <div id="postsEmptyState" class="empty-state" style="display:none;">
-                💬 No posts yet. Be the first to share something from the "Create Post" tab.
-            </div>
-        </section>
+        <button type="submit">Publish Post</button>
+        <div id="postFormStatus" class="status"></div>
+      </form>
+
+      <hr style="margin:14px 0; border:none; border-top:1px solid #e5e7eb;">
+
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+        <h3 style="margin:0;">Community Feed</h3>
+        <button type="button" id="refreshPostsBtn" style="padding:4px 10px; font-size:0.8rem;">Refresh</button>
+      </div>
+      <div id="postsStatus" class="status"></div>
+      <div id="postsList" class="post-list"></div>
     </div>
-</div>
 
-<!-- Post Detail + Comments Modal -->
-<div class="modal-backdrop" id="postModalBackdrop">
-    <div class="modal">
-        <div class="modal-header">
-            <div>
-                <div class="modal-title" id="modalPostTitle"></div>
-                <div class="post-meta" id="modalPostMeta"></div>
-            </div>
-            <button class="modal-close" id="modalCloseBtn">&times;</button>
-        </div>
+    <!-- Right: selected post + comments -->
+    <div class="card" style="flex:1;">
+      <h2 style="margin-top:0;">Post Details & Comments</h2>
+      <div id="selectedPost">
+        <div class="empty">Select a post from the left to view details and comments.</div>
+      </div>
 
-        <div>
-            <div class="modal-section-title">Content</div>
-            <div id="modalPostContent" style="font-size:0.9rem;color:#374151;white-space:pre-wrap;"></div>
+      <div id="commentSection" style="margin-top:10px; display:none;">
+        <h3 style="margin:8px 0 4px;">Add Comment</h3>
+        <form id="commentForm">
+          <label for="commentAuthor">Your Name *</label>
+          <input id="commentAuthor" required value="Aishika">
 
-            <div class="modal-section-title" style="margin-top:12px;">Comments</div>
-            <div id="modalCommentsContainer" class="comment-list"></div>
-            <div id="modalNoComments" class="empty-state" style="padding:10px 0;font-size:0.85rem;">
-                No comments yet. Be the first to comment!
-            </div>
+          <label for="commentText">Comment *</label>
+          <textarea id="commentText" required></textarea>
 
-            <div class="modal-section-title" style="margin-top:12px;">Add a Comment</div>
-            <form id="addCommentForm">
-                <div class="form-group" style="margin-bottom:8px;">
-                    <textarea id="commentTextInput" placeholder="Write your comment..." required></textarea>
-                </div>
-                <button type="submit" class="btn-primary">Post Comment</button>
-                <div id="commentStatus" class="status"></div>
-            </form>
-        </div>
+          <button type="submit">Post Comment</button>
+          <div id="commentFormStatus" class="status"></div>
+        </form>
+      </div>
     </div>
+  </div>
 </div>
 
 <script>
-    // Simulates the linked list of posts & comments in memory
-    const posts = [];
+  const API_BASE = "http://localhost:3000";
 
-    let currentUser = "Guest";
-    let activePostId = null; // which post is currently open in modal
+  const postForm = document.getElementById("postForm");
+  const postFormStatus = document.getElementById("postFormStatus");
+  const postsList = document.getElementById("postsList");
+  const postsStatus = document.getElementById("postsStatus");
+  const refreshPostsBtn = document.getElementById("refreshPostsBtn");
 
-    // Utility: format date like getDate in C: dd-mm-yyyy
-    function getCurrentFormattedDate() {
-        const d = new Date();
-        const day = String(d.getDate()).padStart(2, "0");
-        const month = String(d.getMonth() + 1).padStart(2, "0");
-        const year = d.getFullYear();
-        return `${day}-${month}-${year}`;
+  const selectedPostContainer = document.getElementById("selectedPost");
+  const commentSection = document.getElementById("commentSection");
+  const commentForm = document.getElementById("commentForm");
+  const commentFormStatus = document.getElementById("commentFormStatus");
+
+  let postsCache = [];
+  let selectedPostTitle = null;
+
+  function escapeHtml(text) {
+    return String(text || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  async function loadPosts() {
+    postsStatus.textContent = "Loading posts...";
+    postsStatus.className = "status";
+    postsList.innerHTML = "";
+    try {
+      const resp = await fetch(`${API_BASE}/api/posts`);
+      const data = await resp.json();
+      postsCache = Array.isArray(data) ? data : [];
+      if (postsCache.length === 0) {
+        postsStatus.textContent = "No posts yet. Be the first to post!";
+        return;
+      }
+      postsStatus.textContent = "";
+      postsCache.forEach(post => {
+        const div = document.createElement("div");
+        div.className = "post-item";
+        div.onclick = () => selectPost(post.title);
+        div.innerHTML = `
+          <div class="post-title">${escapeHtml(post.title)}</div>
+          <div class="post-meta">
+            By ${escapeHtml(post.author)} on ${escapeHtml(post.date)}
+            <span class="badge">${post.commentsCount || 0} comments</span>
+          </div>
+          <div class="post-content">${escapeHtml(post.content)}</div>
+        `;
+        postsList.appendChild(div);
+      });
+    } catch (err) {
+      console.error(err);
+      postsStatus.textContent = "Error loading posts from backend.";
+      postsStatus.className = "status err";
+    }
+  }
+
+  postForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    postFormStatus.textContent = "";
+    postFormStatus.className = "status";
+
+    const title = document.getElementById("postTitle").value.trim();
+    const author = document.getElementById("postAuthor").value.trim();
+    const content = document.getElementById("postContent").value.trim();
+
+    if (!title || !author || !content) {
+      postFormStatus.textContent = "Please fill all fields.";
+      postFormStatus.className = "status err";
+      return;
     }
 
-    function escapeHtml(text) {
-        return text
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
+    try {
+      const resp = await fetch(`${API_BASE}/api/posts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, author, content })
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        throw new Error(data.error || "Backend error");
+      }
+      postFormStatus.textContent = "✅ Post published!";
+      postFormStatus.className = "status ok";
+      postForm.reset();
+      await loadPosts();
+    } catch (err) {
+      console.error(err);
+      postFormStatus.textContent = "Error publishing post.";
+      postFormStatus.className = "status err";
+    }
+  });
+
+  refreshPostsBtn.addEventListener("click", loadPosts);
+
+  async function selectPost(title) {
+    selectedPostTitle = title;
+    selectedPostContainer.innerHTML = `<div class="empty">Loading post...</div>`;
+    commentSection.style.display = "none";
+    commentFormStatus.textContent = "";
+    commentFormStatus.className = "status";
+
+    try {
+      const resp = await fetch(`${API_BASE}/api/posts/${encodeURIComponent(title)}`);
+      if (resp.status === 404) {
+        selectedPostContainer.innerHTML = `<div class="empty">Post not found.</div>`;
+        return;
+      }
+      const post = await resp.json();
+      const commentsHtml = (post.comments && post.comments.length)
+        ? post.comments.map(c => `
+            <div class="comment">
+              <div class="comment-author">${escapeHtml(c.author)}</div>
+              <div class="comment-text">${escapeHtml(c.text)}</div>
+            </div>
+          `).join("")
+        : `<div class="empty">No comments yet. Be the first to comment!</div>`;
+
+      selectedPostContainer.innerHTML = `
+        <div class="post-title">${escapeHtml(post.title)}</div>
+        <div class="post-meta">
+          By ${escapeHtml(post.author)} on ${escapeHtml(post.date)}
+        </div>
+        <div class="post-content" style="margin-top:4px;">${escapeHtml(post.content)}</div>
+        <div class="comments">
+          <h3 style="margin:6px 0;">Comments</h3>
+          ${commentsHtml}
+        </div>
+      `;
+      commentSection.style.display = "block";
+    } catch (err) {
+      console.error(err);
+      selectedPostContainer.innerHTML = `<div class="empty">Error loading post details.</div>`;
+    }
+  }
+
+  commentForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    commentFormStatus.textContent = "";
+    commentFormStatus.className = "status";
+
+    if (!selectedPostTitle) {
+      commentFormStatus.textContent = "Select a post first.";
+      commentFormStatus.className = "status err";
+      return;
     }
 
-    // --- Username handling (simulating 'username' argument in C functions) ---
-    const usernameInput = document.getElementById("usernameInput");
-    const setUsernameBtn = document.getElementById("setUsernameBtn");
-    const currentUserLabel = document.getElementById("currentUserLabel");
+    const author = document.getElementById("commentAuthor").value.trim();
+    const text = document.getElementById("commentText").value.trim();
 
-    setUsernameBtn.addEventListener("click", () => {
-        const name = usernameInput.value.trim();
-        currentUser = name || "Guest";
-        currentUserLabel.textContent = `(current: ${currentUser})`;
-    });
-
-    // --- Tabs ---
-    const tabButtons = document.querySelectorAll(".tab-btn");
-    const sections = document.querySelectorAll(".section");
-
-    tabButtons.forEach(btn => {
-        btn.addEventListener("click", () => {
-            const targetId = btn.getAttribute("data-target");
-
-            tabButtons.forEach(b => b.classList.remove("active"));
-            sections.forEach(sec => sec.classList.remove("active"));
-
-            btn.classList.add("active");
-            document.getElementById(targetId).classList.add("active");
-
-            if (targetId === "tab-feed") {
-                renderPosts();
-            }
-        });
-    });
-
-    // --- Create Post (createPost in C) ---
-    const createPostForm = document.getElementById("createPostForm");
-    const clearPostFormBtn = document.getElementById("clearPostFormBtn");
-    const createPostStatus = document.getElementById("createPostStatus");
-
-    createPostForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const titleInput = document.getElementById("postTitleInput");
-        const contentInput = document.getElementById("postContentInput");
-
-        const title = titleInput.value.trim();
-        const content = contentInput.value.trim();
-
-        if (!title || !content) {
-            createPostStatus.textContent = "Please fill all required fields.";
-            createPostStatus.className = "status error";
-            return;
-        }
-
-        const newPost = {
-            id: Date.now(), // unique id
-            title,
-            author: currentUser,
-            date: getCurrentFormattedDate(),
-            content,
-            comments: []
-        };
-
-        // Insert at head like in C (postListHead)
-        posts.unshift(newPost);
-
-        createPostStatus.textContent = "Post created successfully!";
-        createPostStatus.className = "status success";
-        createPostForm.reset();
-
-        // Refresh feed silently
-        renderPosts();
-    });
-
-    clearPostFormBtn.addEventListener("click", () => {
-        createPostForm.reset();
-        createPostStatus.textContent = "";
-        createPostStatus.className = "status";
-    });
-
-    // --- View All Posts (viewAllPosts in C) ---
-    const postsContainer = document.getElementById("postsContainer");
-    const postsEmptyState = document.getElementById("postsEmptyState");
-
-    function renderPosts() {
-        postsContainer.innerHTML = "";
-        if (posts.length === 0) {
-            postsEmptyState.style.display = "block";
-            return;
-        }
-        postsEmptyState.style.display = "none";
-
-        posts.forEach((post) => {
-            const card = document.createElement("div");
-            card.className = "post-card";
-
-            const commentCount = post.comments.length;
-
-            card.innerHTML = `
-                <div class="post-title">${escapeHtml(post.title)}</div>
-                <div class="post-meta">
-                    <span class="pill pill-blue">By ${escapeHtml(post.author)}</span>
-                    <span class="pill">Date: ${escapeHtml(post.date)}</span>
-                    <span class="pill">Comments: ${commentCount}</span>
-                </div>
-                <div class="post-content-preview">
-                    ${escapeHtml(post.content.length > 120 ? post.content.slice(0, 120) + "..." : post.content)}
-                </div>
-                <div style="margin-top:8px;">
-                    <button class="btn-link" data-post-id="${post.id}">View & Comment</button>
-                </div>
-            `;
-
-            postsContainer.appendChild(card);
-        });
-
-        // Attach click handlers for "View & Comment" buttons
-        postsContainer.querySelectorAll(".btn-link").forEach(btn => {
-            btn.addEventListener("click", () => {
-                const postId = Number(btn.getAttribute("data-post-id"));
-                openPostModal(postId);
-            });
-        });
+    if (!author || !text) {
+      commentFormStatus.textContent = "Please fill all fields.";
+      commentFormStatus.className = "status err";
+      return;
     }
 
-    // --- View specific Post with comments (viewPostWithComments in C) ---
-    const postModalBackdrop = document.getElementById("postModalBackdrop");
-    const modalCloseBtn = document.getElementById("modalCloseBtn");
-    const modalPostTitle = document.getElementById("modalPostTitle");
-    const modalPostMeta = document.getElementById("modalPostMeta");
-    const modalPostContent = document.getElementById("modalPostContent");
-    const modalCommentsContainer = document.getElementById("modalCommentsContainer");
-    const modalNoComments = document.getElementById("modalNoComments");
-    const addCommentForm = document.getElementById("addCommentForm");
-    const commentTextInput = document.getElementById("commentTextInput");
-    const commentStatus = document.getElementById("commentStatus");
-
-    function openPostModal(postId) {
-        const post = posts.find(p => p.id === postId);
-        if (!post) return;
-
-        activePostId = postId;
-
-        modalPostTitle.textContent = post.title;
-        modalPostMeta.textContent = `By ${post.author} • ${post.date}`;
-        modalPostContent.textContent = post.content;
-
-        renderComments(post);
-
-        commentTextInput.value = "";
-        commentStatus.textContent = "";
-        commentStatus.className = "status";
-
-        postModalBackdrop.classList.add("active");
+    try {
+      const resp = await fetch(`${API_BASE}/api/posts/${encodeURIComponent(selectedPostTitle)}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ author, text })
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        throw new Error(data.error || "Backend error");
+      }
+      commentFormStatus.textContent = "✅ Comment added!";
+      commentFormStatus.className = "status ok";
+      commentForm.reset();
+      await selectPost(selectedPostTitle);
+      await loadPosts();
+    } catch (err) {
+      console.error(err);
+      commentFormStatus.textContent = "Error adding comment.";
+      commentFormStatus.className = "status err";
     }
+  });
 
-    function closePostModal() {
-        postModalBackdrop.classList.remove("active");
-        activePostId = null;
-    }
-
-    modalCloseBtn.addEventListener("click", closePostModal);
-    postModalBackdrop.addEventListener("click", (e) => {
-        if (e.target === postModalBackdrop) {
-            closePostModal();
-        }
-    });
-
-    function renderComments(post) {
-        modalCommentsContainer.innerHTML = "";
-
-        if (!post.comments || post.comments.length === 0) {
-            modalNoComments.style.display = "block";
-            return;
-        }
-
-        modalNoComments.style.display = "none";
-
-        post.comments.forEach((c, index) => {
-            const item = document.createElement("div");
-            item.className = "comment-item";
-            item.innerHTML = `
-                <div class="comment-meta">${index + 1}. ${escapeHtml(c.author)} wrote:</div>
-                <div class="comment-text">${escapeHtml(c.text)}</div>
-            `;
-            modalCommentsContainer.appendChild(item);
-        });
-    }
-
-    // --- Add Comment (addComment in C) ---
-    addCommentForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        if (activePostId === null) return;
-
-        const text = commentTextInput.value.trim();
-        if (!text) {
-            commentStatus.textContent = "Please write a comment before submitting.";
-            commentStatus.className = "status error";
-            return;
-        }
-
-        const post = posts.find(p => p.id === activePostId);
-        if (!post) return;
-
-        const newComment = {
-            author: currentUser,
-            text
-        };
-
-        // Add to end, like in the C code
-        post.comments.push(newComment);
-
-        commentStatus.textContent = "Comment added successfully!";
-        commentStatus.className = "status success";
-        commentTextInput.value = "";
-
-        renderComments(post);
-        renderPosts(); // update comment count in feed
-    });
-
-    // Initial render
-    renderPosts();
+  // Initial load
+  loadPosts();
 </script>
 </body>
 </html>
+
