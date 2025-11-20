@@ -17,6 +17,7 @@ typedef struct Faculty {
     struct Faculty* next;
 } Faculty;
 
+// Console functions (original)
 void addFaculty();
 void removeFaculty();
 void viewAllFaculty();
@@ -25,5 +26,18 @@ void searchFacultyBySubject();
 void searchFacultyById();
 void initializeFaculty();
 void cleanupFaculty();
+
+// Web API helpers
+void addFacultyFromData(const char* name,
+                        const char* facultyId,
+                        const char* department,
+                        const char* subject,
+                        const char* email);
+
+int  removeFacultyByIdSimple(const char* facultyId);
+void printAllFacultyAsJson();
+
+void loadFaculty();
+void saveAllFaculty();
 
 #endif // FACULTY_H
