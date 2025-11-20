@@ -387,9 +387,10 @@
         </section>
     </div>
 </div>
-
 <script>
-    const doubts = [];
+    const API_URL = 'http://localhost:3000';
+    const DOUBTS_ENDPOINT = API_URL + '/api/doubts';
+
     let currentUser = "Guest";
     let currentRole = "student";
 
@@ -417,9 +418,9 @@
             btn.classList.add("active");
             document.getElementById(targetId).classList.add("active");
 
-            if (targetId === "tab-pending") renderPendingDoubts();
-            if (targetId === "tab-solved") renderSolvedDoubts();
-            if (targetId === "tab-my") renderMyDoubts();
+            if (targetId === "tab-pending") loadPendingDoubts();
+            if (targetId === "tab-solved") loadSolvedDoubts();
+            if (targetId === "tab-my") loadMyDoubts();
         });
     });
 
@@ -428,7 +429,7 @@
     const postDoubtStatus = document.getElementById("postDoubtStatus");
     const clearDoubtBtn = document.getElementById("clearDoubtBtn");
 
-    postDoubtForm.addEventListener("submit", (e) => {
+    postDoubtForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         const subject = document.getElementById("doubtSubject").value.trim();
         const text = document.getElementById("doubtText").value.trim();
@@ -439,152 +440,222 @@
             return;
         }
 
-        const doubt = {
-            id: Date.now(),
-            studentName: currentUser,
-            subject,
-            doubtText: text,
-            status: "pending",
-            solvedBy: "N/A",
-            solution: "N/A"
-        };
+        try {
+            const response = await fetch(DOUBTS_ENDPOINT, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    studentName: currentUser,
+                    subject,
+                    doubtText: text
+                })
+            });
 
-        doubts.push(doubt);
-        postDoubtStatus.textContent = "✅ Doubt posted successfully!";
-        postDoubtStatus.className = "status success";
-        postDoubtForm.reset();
+            if (!response.ok) {
+                postDoubtStatus.textContent = "✗ Failed to post doubt.";
+                postDoubtStatus.className = "status error";
+                return;
+            }
+
+            postDoubtStatus.textContent = "✅ Doubt posted successfully!";
+            postDoubtStatus.className = "status success";
+            postDoubtForm.reset();
+        } catch (err) {
+            console.error(err);
+            postDoubtStatus.textContent = "✗ Cannot connect to backend server.";
+            postDoubtStatus.className = "status error";
+        }
     });
 
     clearDoubtBtn.addEventListener("click", () => {
         postDoubtForm.reset();
         postDoubtStatus.textContent = "";
+        postDoubtStatus.className = "status";
     });
 
-    // Render Pending Doubts
-    function renderPendingDoubts() {
+    // === Load & render functions ===
+
+    async function loadPendingDoubts() {
         const container = document.getElementById("pendingDoubtsContainer");
         const empty = document.getElementById("pendingEmpty");
         container.innerHTML = "";
-
-        const pending = doubts.filter(d => d.status === "pending");
-
-        if (pending.length === 0) {
-            empty.style.display = "block";
-            return;
-        }
         empty.style.display = "none";
 
-        pending.forEach(doubt => {
-            const card = document.createElement("div");
-            card.className = "doubt-card pending";
-            card.innerHTML = `
-                <div class="doubt-header">
-                    <div class="doubt-student">👤 ${escapeHtml(doubt.studentName)}</div>
-                    <span class="doubt-status pending">Pending</span>
-                </div>
-                <div class="doubt-subject">📚 ${escapeHtml(doubt.subject)}</div>
-                <div class="doubt-text">${escapeHtml(doubt.doubtText)}</div>
-                ${currentRole === "faculty" ? `
-                    <div class="solve-form" id="solve-${doubt.id}">
-                        <textarea id="solution-${doubt.id}" placeholder="Enter solution..." style="width:100%;padding:6px;border-radius:6px;border:1px solid #d1d5db;font-size:0.85rem;min-height:60px;"></textarea>
-                        <button class="btn-success" style="margin-top:6px;font-size:0.85rem;padding:6px 12px;" onclick="solveDoubt(${doubt.id})">✅ Solve</button>
+        try {
+            const res = await fetch(DOUBTS_ENDPOINT + "?status=pending");
+            const pending = await res.json();
+
+            if (!Array.isArray(pending) || pending.length === 0) {
+                empty.style.display = "block";
+                return;
+            }
+
+            pending.forEach((doubt, index) => {
+                const card = document.createElement("div");
+                card.className = "doubt-card pending";
+                const textareaId = `solution-${index}`;
+
+                card.innerHTML = `
+                    <div class="doubt-header">
+                        <div class="doubt-student">👤 ${escapeHtml(doubt.studentName)}</div>
+                        <span class="doubt-status pending">Pending</span>
                     </div>
-                ` : ''}
-            `;
-            container.appendChild(card);
-        });
+                    <div class="doubt-subject">📚 ${escapeHtml(doubt.subject)}</div>
+                    <div class="doubt-text">${escapeHtml(doubt.doubtText)}</div>
+                    ${currentRole === "faculty" ? `
+                        <div class="solve-form">
+                            <textarea id="${textareaId}" placeholder="Enter solution..." style="width:100%;padding:6px;border-radius:6px;border:1px solid #d1d5db;font-size:0.85rem;min-height:60px;"></textarea>
+                            <button class="btn-success" style="margin-top:6px;font-size:0.85rem;padding:6px 12px;"
+                                onclick="solveDoubt('${encodeURIComponent(doubt.studentName)}', '${textareaId}')">
+                                ✅ Solve
+                            </button>
+                        </div>
+                    ` : ''}
+                `;
+                container.appendChild(card);
+            });
+        } catch (err) {
+            console.error(err);
+            empty.style.display = "block";
+            empty.textContent = "✗ Cannot load pending doubts.";
+        }
     }
 
-    // Solve Doubt
-    window.solveDoubt = function(doubtId) {
-        const doubt = doubts.find(d => d.id === doubtId);
-        if (!doubt) return;
+    async function loadSolvedDoubts() {
+        const container = document.getElementById("solvedDoubtsContainer");
+        const empty = document.getElementById("solvedEmpty");
+        container.innerHTML = "";
+        empty.style.display = "none";
 
-        const solutionText = document.getElementById(`solution-${doubtId}`).value.trim();
+        try {
+            const res = await fetch(DOUBTS_ENDPOINT + "?status=solved");
+            const solved = await res.json();
+
+            if (!Array.isArray(solved) || solved.length === 0) {
+                empty.style.display = "block";
+                return;
+            }
+
+            solved.forEach(doubt => {
+                const card = document.createElement("div");
+                card.className = "doubt-card solved";
+                card.innerHTML = `
+                    <div class="doubt-header">
+                        <div class="doubt-student">👤 ${escapeHtml(doubt.studentName)}</div>
+                        <span class="doubt-status solved">Solved</span>
+                    </div>
+                    <div class="doubt-subject">📚 ${escapeHtml(doubt.subject)}</div>
+                    <div class="doubt-text">${escapeHtml(doubt.doubtText)}</div>
+                    <div class="doubt-solution">
+                        <strong>💡 Solution:</strong><br>${escapeHtml(doubt.solution || "")}
+                        <div class="doubt-solver">✅ Solved by: ${escapeHtml(doubt.solvedBy || "")}</div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        } catch (err) {
+            console.error(err);
+            empty.style.display = "block";
+            empty.textContent = "✗ Cannot load solved doubts.";
+        }
+    }
+
+    async function loadMyDoubts() {
+        const container = document.getElementById("myDoubtsContainer");
+        const empty = document.getElementById("myEmpty");
+        container.innerHTML = "";
+        empty.style.display = "none";
+
+        if (!currentUser || currentUser === "Guest") {
+            empty.style.display = "block";
+            empty.textContent = "Set your username above to see your doubts.";
+            return;
+        }
+
+        try {
+            const res = await fetch(DOUBTS_ENDPOINT + "?student=" + encodeURIComponent(currentUser));
+            const myDoubts = await res.json();
+
+            if (!Array.isArray(myDoubts) || myDoubts.length === 0) {
+                empty.style.display = "block";
+                empty.textContent = "You haven't posted any doubts yet.";
+                return;
+            }
+
+            myDoubts.forEach(doubt => {
+                const card = document.createElement("div");
+                card.className = `doubt-card ${doubt.status}`;
+                card.innerHTML = `
+                    <div class="doubt-header">
+                        <div class="doubt-student">My Doubt</div>
+                        <span class="doubt-status ${doubt.status}">${escapeHtml(doubt.status)}</span>
+                    </div>
+                    <div class="doubt-subject">📚 ${escapeHtml(doubt.subject)}</div>
+                    <div class="doubt-text">${escapeHtml(doubt.doubtText)}</div>
+                    ${doubt.status === "solved" ? `
+                        <div class="doubt-solution">
+                            <strong>💡 Solution:</strong><br>${escapeHtml(doubt.solution || "")}
+                            <div class="doubt-solver">✅ Solved by: ${escapeHtml(doubt.solvedBy || "")}</div>
+                        </div>
+                    ` : ''}
+                `;
+                container.appendChild(card);
+            });
+        } catch (err) {
+            console.error(err);
+            empty.style.display = "block";
+            empty.textContent = "✗ Cannot load your doubts.";
+        }
+    }
+
+    // Solve Doubt (faculty)
+    window.solveDoubt = async function(encodedStudentName, textareaId) {
+        const studentName = decodeURIComponent(encodedStudentName);
+        const textarea = document.getElementById(textareaId);
+        if (!textarea) return;
+
+        const solutionText = textarea.value.trim();
         if (!solutionText) {
             alert("Please enter a solution!");
             return;
         }
 
-        doubt.status = "solved";
-        doubt.solution = solutionText;
-        doubt.solvedBy = currentUser;
+        try {
+            const res = await fetch(API_URL + "/api/doubts/solve", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    studentName,
+                    facultyName: currentUser,
+                    solution: solutionText
+                })
+            });
 
-        renderPendingDoubts();
-        alert("Doubt solved successfully!");
+            const data = await res.json();
+            if (!data.success) {
+                alert("✗ " + (data.message || "Failed to mark doubt as solved."));
+                return;
+            }
+
+            alert("Doubt solved successfully!");
+            // Refresh lists
+            loadPendingDoubts();
+            loadSolvedDoubts();
+        } catch (err) {
+            console.error(err);
+            alert("✗ Cannot connect to backend server.");
+        }
     };
 
-    // Render Solved Doubts
-    function renderSolvedDoubts() {
-        const container = document.getElementById("solvedDoubtsContainer");
-        const empty = document.getElementById("solvedEmpty");
-        container.innerHTML = "";
-
-        const solved = doubts.filter(d => d.status === "solved");
-
-        if (solved.length === 0) {
-            empty.style.display = "block";
-            return;
-        }
-        empty.style.display = "none";
-
-        solved.forEach(doubt => {
-            const card = document.createElement("div");
-            card.className = "doubt-card solved";
-            card.innerHTML = `
-                <div class="doubt-header">
-                    <div class="doubt-student">👤 ${escapeHtml(doubt.studentName)}</div>
-                    <span class="doubt-status solved">Solved</span>
-                </div>
-                <div class="doubt-subject">📚 ${escapeHtml(doubt.subject)}</div>
-                <div class="doubt-text">${escapeHtml(doubt.doubtText)}</div>
-                <div class="doubt-solution">
-                    <strong>💡 Solution:</strong><br>${escapeHtml(doubt.solution)}
-                    <div class="doubt-solver">✅ Solved by: ${escapeHtml(doubt.solvedBy)}</div>
-                </div>
-            `;
-            container.appendChild(card);
-        });
-    }
-
-    // Render My Doubts
-    function renderMyDoubts() {
-        const container = document.getElementById("myDoubtsContainer");
-        const empty = document.getElementById("myEmpty");
-        container.innerHTML = "";
-
-        const myDoubts = doubts.filter(d => d.studentName === currentUser);
-
-        if (myDoubts.length === 0) {
-            empty.style.display = "block";
-            return;
-        }
-        empty.style.display = "none";
-
-        myDoubts.forEach(doubt => {
-            const card = document.createElement("div");
-            card.className = `doubt-card ${doubt.status}`;
-            card.innerHTML = `
-                <div class="doubt-header">
-                    <div class="doubt-student">My Doubt</div>
-                    <span class="doubt-status ${doubt.status}">${doubt.status}</span>
-                </div>
-                <div class="doubt-subject">📚 ${escapeHtml(doubt.subject)}</div>
-                <div class="doubt-text">${escapeHtml(doubt.doubtText)}</div>
-                ${doubt.status === "solved" ? `
-                    <div class="doubt-solution">
-                        <strong>💡 Solution:</strong><br>${escapeHtml(doubt.solution)}
-                        <div class="doubt-solver">✅ Solved by: ${escapeHtml(doubt.solvedBy)}</div>
-                    </div>
-                ` : ''}
-            `;
-            container.appendChild(card);
-        });
-    }
-
     function escapeHtml(text) {
-        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        if (!text) return "";
+        return text
+            .toString()
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
     }
 </script>
+
 </body>
 </html>
