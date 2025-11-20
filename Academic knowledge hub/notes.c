@@ -62,7 +62,6 @@ void loadNotes() {
     }
 
     fclose(fp);
-    printf(" Loaded notes from file.\n");
 }
 
 void saveAllNotes() {

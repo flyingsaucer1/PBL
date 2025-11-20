@@ -252,7 +252,7 @@ void addComment(char* username) {
                 lastComment->next = newComment;
             }
             
-            saveAllComments(); // moved here for correctness
+            saveAllComments();
             printf("\n Comment added successfully!\n");
             return;
         }

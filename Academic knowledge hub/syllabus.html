@@ -1,563 +1,266 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Syllabus Management System</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        }
+<meta charset="UTF-8">
+<title>Syllabus Module</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        body {
-            background: #f3f4f6;
-            color: #111827;
-            padding: 20px;
-        }
+<style>
+    body {
+        font-family: "Segoe UI", sans-serif;
+        background: #f5f6fa;
+        padding: 20px;
+    }
 
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-        }
+    h1 {
+        margin-bottom: 20px;
+        color: #333;
+    }
 
-        header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
+    .card {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.07);
+        margin-bottom: 25px;
+    }
 
-        header h1 {
-            font-size: 1.8rem;
-            font-weight: 700;
-        }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
 
-        .badge {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 999px;
-            background: #eff6ff;
-            color: #1d4ed8;
-            font-size: 0.75rem;
-        }
+    table th {
+        text-align: left;
+        padding: 12px;
+        background: #007bff;
+        color: white;
+        font-weight: 600;
+    }
 
-        .card {
-            background: #ffffff;
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
-            margin-bottom: 20px;
-        }
+    table td {
+        padding: 12px;
+        background: #fff;
+        border-bottom: 1px solid #ddd;
+    }
 
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        }
+    .btn {
+        padding: 6px 12px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
 
-        .tab-btn {
-            border: none;
-            background: #e5e7eb;
-            padding: 8px 16px;
-            border-radius: 999px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
+    .btn-primary {
+        background: #007bff;
+        color: white;
+    }
 
-        .tab-btn.active {
-            background: #2563eb;
-            color: white;
-        }
+    .btn-danger {
+        background: #e63946;
+        color: white;
+    }
 
-        .section {
-            display: none;
-        }
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
 
-        .section.active {
-            display: block;
-        }
+    .btn-small {
+        padding: 4px 8px;
+        font-size: 0.8rem;
+    }
 
-        .form-group {
-            margin-bottom: 12px;
-        }
+    input, textarea {
+        width: 100%;
+        padding: 8px;
+        margin: 6px 0 14px 0;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+    }
 
-        label {
-            display: block;
-            font-size: 0.9rem;
-            margin-bottom: 4px;
-            font-weight: 600;
-        }
+    .book-list {
+        background: #f1f3f5;
+        padding: 10px;
+        border-radius: 6px;
+        margin-top: 10px;
+    }
 
-        input[type="text"], textarea {
-            width: 100%;
-            padding: 8px 10px;
-            border-radius: 10px;
-            border: 1px solid #d1d5db;
-            font-size: 0.9rem;
-            outline: none;
-            background: #f9fafb;
-        }
+    .modal-bg {
+        position: fixed;
+        left: 0; top: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+    }
 
-        input:focus, textarea:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
-            background: white;
-        }
+    .modal {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        width: 400px;
+    }
 
-        textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        .btn-primary {
-            padding: 8px 16px;
-            border-radius: 999px;
-            border: none;
-            background: #2563eb;
-            color: white;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .btn-primary:hover {
-            background: #1d4ed8;
-        }
-
-        .btn-secondary {
-            border: none;
-            background: transparent;
-            color: #6b7280;
-            font-size: 0.85rem;
-            cursor: pointer;
-            margin-left: 10px;
-        }
-
-        .status {
-            margin-top: 8px;
-            font-size: 0.85rem;
-        }
-
-        .status.success {
-            color: #16a34a;
-        }
-
-        .status.error {
-            color: #dc2626;
-        }
-
-        .syllabus-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 16px;
-        }
-
-        .syllabus-card {
-            background: #ffffff;
-            border: 1px solid #e5e7eb;
-            border-radius: 14px;
-            padding: 16px;
-            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
-        }
-
-        .syllabus-subject {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-            color: #111827;
-        }
-
-        .syllabus-units {
-            font-size: 0.9rem;
-            color: #374151;
-            margin-bottom: 10px;
-            white-space: pre-wrap;
-        }
-
-        .books-section {
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid #e5e7eb;
-        }
-
-        .books-title {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #6b7280;
-            margin-bottom: 6px;
-        }
-
-        .book-item {
-            background: #f9fafb;
-            padding: 8px;
-            border-radius: 6px;
-            margin-bottom: 6px;
-            font-size: 0.85rem;
-        }
-
-        .book-title {
-            font-weight: 600;
-            color: #111827;
-        }
-
-        .book-author {
-            color: #6b7280;
-            font-size: 0.8rem;
-        }
-
-        .empty-state {
-            padding: 20px;
-            text-align: center;
-            font-size: 0.9rem;
-            color: #6b7280;
-        }
-
-        .search-row {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .search-row input {
-            flex: 1;
-            min-width: 200px;
-        }
-
-        @media (max-width: 640px) {
-            header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-        }
-    </style>
+</style>
 </head>
 <body>
-<div class="container">
-    <header>
-        <div>
-            <h1>📚 Syllabus Management System</h1>
-            <span>Manage course syllabus and reference books</span>
-        </div>
-        <span class="badge">Module: syllabus.c</span>
-    </header>
 
-    <div class="card">
-        <div class="tabs">
-            <button class="tab-btn active" data-target="tab-add">Add Syllabus</button>
-            <button class="tab-btn" data-target="tab-add-book">Add Book</button>
-            <button class="tab-btn" data-target="tab-view">View All</button>
-            <button class="tab-btn" data-target="tab-search">Search by Subject</button>
-            <button class="tab-btn" data-target="tab-books">View Books</button>
-        </div>
+<h1>📘 Syllabus Module</h1>
 
-        <!-- Add Syllabus -->
-        <section id="tab-add" class="section active">
-            <h2 style="font-size:1.1rem;margin-bottom:10px;">➕ Add New Syllabus</h2>
-            <form id="addSyllabusForm">
-                <div class="form-group">
-                    <label>Subject *</label>
-                    <input type="text" id="syllabusSubject" required placeholder="Enter subject name">
-                </div>
-                <div class="form-group">
-                    <label>Units/Topics *</label>
-                    <textarea id="syllabusUnits" required placeholder="Enter course units and topics"></textarea>
-                </div>
-                <button type="submit" class="btn-primary">Add Syllabus</button>
-                <button type="button" class="btn-secondary" id="clearSyllabusBtn">Clear</button>
-                <div id="addSyllabusStatus" class="status"></div>
-            </form>
-        </section>
+<div class="card">
+    <h2>Add New Syllabus</h2>
+    <input id="subject" placeholder="Subject name">
+    <textarea id="units" placeholder="Enter units/topics"></textarea>
+    <button class="btn btn-primary" onclick="addSyllabus()">Add Syllabus</button>
+</div>
 
-        <!-- Add Book -->
-        <section id="tab-add-book" class="section">
-            <h2 style="font-size:1.1rem;margin-bottom:10px;">📖 Add Reference Book</h2>
-            <div class="form-group">
-                <label>Select Subject *</label>
-                <select id="bookSubjectSelect" style="width:100%;padding:8px 10px;border-radius:10px;border:1px solid #d1d5db;font-size:0.9rem;background:#f9fafb;">
-                    <option value="">-- Select Subject --</option>
-                </select>
-            </div>
-            <form id="addBookForm">
-                <div class="form-group">
-                    <label>Book Title *</label>
-                    <input type="text" id="bookTitle" required placeholder="Enter book title">
-                </div>
-                <div class="form-group">
-                    <label>Book Author *</label>
-                    <input type="text" id="bookAuthor" required placeholder="Enter author name">
-                </div>
-                <button type="submit" class="btn-primary">Add Book</button>
-                <button type="button" class="btn-secondary" id="clearBookBtn">Clear</button>
-                <div id="addBookStatus" class="status"></div>
-            </form>
-        </section>
+<div class="card">
+    <h2>All Syllabus</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Subject</th>
+                <th>Units</th>
+                <th>Books</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="syllabusTable"></tbody>
+    </table>
+</div>
 
-        <!-- View All Syllabus -->
-        <section id="tab-view" class="section">
-            <h2 style="font-size:1.1rem;margin-bottom:10px;">📋 All Syllabus</h2>
-            <div id="allSyllabusContainer" class="syllabus-grid"></div>
-            <div id="allSyllabusEmpty" class="empty-state" style="display:none;">
-                No syllabus added yet.
-            </div>
-        </section>
-
-        <!-- Search by Subject -->
-        <section id="tab-search" class="section">
-            <h2 style="font-size:1.1rem;margin-bottom:10px;">🔍 Search Syllabus by Subject</h2>
-            <div class="form-group">
-                <div class="search-row">
-                    <input type="text" id="searchSubjectInput" placeholder="Enter subject name">
-                    <button class="btn-primary" id="searchSubjectBtn">Search</button>
-                </div>
-            </div>
-            <div id="searchResults" class="syllabus-grid"></div>
-            <div id="searchEmpty" class="empty-state" style="display:none;">
-                No syllabus found for this subject.
-            </div>
-        </section>
-
-        <!-- View Books for Subject -->
-        <section id="tab-books" class="section">
-            <h2 style="font-size:1.1rem;margin-bottom:10px;">📖 View Reference Books</h2>
-            <div class="form-group">
-                <div class="search-row">
-                    <input type="text" id="booksSubjectInput" placeholder="Enter subject name">
-                    <button class="btn-primary" id="viewBooksBtn">View Books</button>
-                </div>
-            </div>
-            <div id="booksResults"></div>
-            <div id="booksEmpty" class="empty-state" style="display:none;">
-                No books found for this subject.
-            </div>
-        </section>
+<!-- Add Book Modal -->
+<div class="modal-bg" id="modalBg">
+    <div class="modal">
+        <h3>Add Book</h3>
+        <input id="bookTitle" placeholder="Book title">
+        <input id="bookAuthor" placeholder="Book author">
+        <button class="btn btn-primary" onclick="saveBook()">Save Book</button>
+        <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
     </div>
 </div>
 
 <script>
-    const syllabusList = [];
+let currentSubjectForBook = "";
 
-    // Tabs
-    const tabButtons = document.querySelectorAll(".tab-btn");
-    const sections = document.querySelectorAll(".section");
+function fetchSyllabus() {
+    fetch("http://localhost:3000/api/syllabus")
+    .then(res => res.json())
+    .then(data => renderTable(data))
+    .catch(() => alert("❌ Cannot connect to backend"));
+}
 
-    tabButtons.forEach(btn => {
-        btn.addEventListener("click", () => {
-            const targetId = btn.getAttribute("data-target");
-            tabButtons.forEach(b => b.classList.remove("active"));
-            sections.forEach(sec => sec.classList.remove("active"));
-            btn.classList.add("active");
-            document.getElementById(targetId).classList.add("active");
+function renderTable(data) {
+    const table = document.getElementById("syllabusTable");
+    table.innerHTML = "";
 
-            if (targetId === "tab-view") renderAllSyllabus();
-            if (targetId === "tab-add-book") updateBookSubjectSelect();
+    if (!Array.isArray(data) || data.length === 0) {
+        table.innerHTML = "<tr><td colspan='4'>No syllabus found.</td></tr>";
+        return;
+    }
+
+    data.forEach(item => {
+        table.innerHTML += `
+        <tr>
+            <td>${item.subject}</td>
+            <td>${item.units}</td>
+            <td>${item.books.length} book(s)</td>
+            <td>
+                <button class="btn btn-small btn-primary" onclick="openModal('${item.subject}')">Add Book</button>
+                <button class="btn btn-small btn-secondary" onclick="viewBooks('${item.subject}')">View</button>
+                <button class="btn btn-small btn-danger" onclick="deleteSyllabus('${item.subject}')">Delete</button>
+            </td>
+        </tr>`;
+    });
+}
+
+// Add syllabus
+function addSyllabus() {
+    const subject = document.getElementById("subject").value.trim();
+    const units = document.getElementById("units").value.trim();
+
+    if (!subject || !units) {
+        alert("Fill all fields!");
+        return;
+    }
+
+    fetch("http://localhost:3000/api/syllabus", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subject, units })
+    })
+    .then(() => {
+        alert("Syllabus added!");
+        fetchSyllabus();
+    });
+}
+
+// Delete subject
+function deleteSyllabus(subject) {
+    if (!confirm("Delete syllabus for " + subject + "?")) return;
+
+    fetch(`http://localhost:3000/api/syllabus/${subject}`, {
+        method: "DELETE"
+    })
+    .then(() => {
+        alert("Deleted!");
+        fetchSyllabus();
+    });
+}
+
+// Modal functions
+function openModal(subject) {
+    currentSubjectForBook = subject;
+    document.getElementById("modalBg").style.display = "flex";
+}
+
+function closeModal() {
+    document.getElementById("modalBg").style.display = "none";
+}
+
+function saveBook() {
+    const title = document.getElementById("bookTitle").value.trim();
+    const author = document.getElementById("bookAuthor").value.trim();
+
+    if (!title || !author) {
+        alert("Fill all fields!");
+        return;
+    }
+
+    fetch("http://localhost:3000/api/syllabus/book", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            subject: currentSubjectForBook,
+            title,
+            author
+        })
+    })
+    .then(() => {
+        alert("Book added!");
+        closeModal();
+        fetchSyllabus();
+    });
+}
+
+function viewBooks(subject) {
+    fetch(`http://localhost:3000/api/syllabus?subject=${subject}`)
+    .then(res => res.json())
+    .then(data => {
+        let msg = `Books for ${subject}:\n\n`;
+        data.books.forEach((b, i) => {
+            msg += `${i+1}. ${b.title} — ${b.author}\n`;
         });
+        alert(msg);
     });
+}
 
-    // Add Syllabus
-    const addSyllabusForm = document.getElementById("addSyllabusForm");
-    const addSyllabusStatus = document.getElementById("addSyllabusStatus");
-    const clearSyllabusBtn = document.getElementById("clearSyllabusBtn");
-
-    addSyllabusForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-
-        const subject = document.getElementById("syllabusSubject").value.trim();
-        const units = document.getElementById("syllabusUnits").value.trim();
-
-        if (!subject || !units) {
-            addSyllabusStatus.textContent = "Please fill all fields.";
-            addSyllabusStatus.className = "status error";
-            return;
-        }
-
-        syllabusList.push({ subject, units, books: [] });
-        addSyllabusStatus.textContent = "✅ Syllabus added successfully!";
-        addSyllabusStatus.className = "status success";
-        addSyllabusForm.reset();
-    });
-
-    clearSyllabusBtn.addEventListener("click", () => {
-        addSyllabusForm.reset();
-        addSyllabusStatus.textContent = "";
-    });
-
-    // Update Book Subject Dropdown
-    function updateBookSubjectSelect() {
-        const select = document.getElementById("bookSubjectSelect");
-        select.innerHTML = '<option value="">-- Select Subject --</option>';
-        syllabusList.forEach(s => {
-            const opt = document.createElement("option");
-            opt.value = s.subject;
-            opt.textContent = s.subject;
-            select.appendChild(opt);
-        });
-    }
-
-    // Add Book
-    const addBookForm = document.getElementById("addBookForm");
-    const addBookStatus = document.getElementById("addBookStatus");
-    const clearBookBtn = document.getElementById("clearBookBtn");
-
-    addBookForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-
-        const subject = document.getElementById("bookSubjectSelect").value;
-        const title = document.getElementById("bookTitle").value.trim();
-        const author = document.getElementById("bookAuthor").value.trim();
-
-        if (!subject) {
-            addBookStatus.textContent = "Please select a subject.";
-            addBookStatus.className = "status error";
-            return;
-        }
-
-        if (!title || !author) {
-            addBookStatus.textContent = "Please fill all fields.";
-            addBookStatus.className = "status error";
-            return;
-        }
-
-        const syllabus = syllabusList.find(s => s.subject.toLowerCase() === subject.toLowerCase());
-        if (syllabus) {
-            syllabus.books.push({ title, author });
-            addBookStatus.textContent = "✅ Book added successfully!";
-            addBookStatus.className = "status success";
-            addBookForm.reset();
-        }
-    });
-
-    clearBookBtn.addEventListener("click", () => {
-        addBookForm.reset();
-        addBookStatus.textContent = "";
-    });
-
-    // Render All Syllabus
-    function renderAllSyllabus() {
-        const container = document.getElementById("allSyllabusContainer");
-        const empty = document.getElementById("allSyllabusEmpty");
-        container.innerHTML = "";
-
-        if (syllabusList.length === 0) {
-            empty.style.display = "block";
-            return;
-        }
-        empty.style.display = "none";
-
-        syllabusList.forEach((syl, idx) => {
-            const card = createSyllabusCard(syl, idx + 1);
-            container.appendChild(card);
-        });
-    }
-
-    function createSyllabusCard(syl, num) {
-        const card = document.createElement("div");
-        card.className = "syllabus-card";
-
-        let booksHtml = "";
-        if (syl.books.length > 0) {
-            booksHtml = `
-                <div class="books-section">
-                    <div class="books-title">📖 Reference Books (${syl.books.length})</div>
-                    ${syl.books.map(b => `
-                        <div class="book-item">
-                            <div class="book-title">${escapeHtml(b.title)}</div>
-                            <div class="book-author">by ${escapeHtml(b.author)}</div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-
-        card.innerHTML = `
-            <div class="syllabus-subject">${num}. ${escapeHtml(syl.subject)}</div>
-            <div class="syllabus-units">${escapeHtml(syl.units)}</div>
-            ${booksHtml}
-        `;
-        return card;
-    }
-
-    // Search by Subject
-    const searchSubjectBtn = document.getElementById("searchSubjectBtn");
-    const searchSubjectInput = document.getElementById("searchSubjectInput");
-    const searchResults = document.getElementById("searchResults");
-    const searchEmpty = document.getElementById("searchEmpty");
-
-    searchSubjectBtn.addEventListener("click", () => {
-        const query = searchSubjectInput.value.trim().toLowerCase();
-        searchResults.innerHTML = "";
-
-        if (!query) {
-            searchEmpty.textContent = "Please enter a subject.";
-            searchEmpty.style.display = "block";
-            return;
-        }
-
-        const found = syllabusList.find(s => s.subject.toLowerCase() === query);
-
-        if (!found) {
-            searchEmpty.textContent = "No syllabus found for subject: " + query;
-            searchEmpty.style.display = "block";
-            return;
-        }
-
-        searchEmpty.style.display = "none";
-        const card = createSyllabusCard(found, 1);
-        searchResults.appendChild(card);
-    });
-
-    // View Books for Subject
-    const viewBooksBtn = document.getElementById("viewBooksBtn");
-    const booksSubjectInput = document.getElementById("booksSubjectInput");
-    const booksResults = document.getElementById("booksResults");
-    const booksEmpty = document.getElementById("booksEmpty");
-
-    viewBooksBtn.addEventListener("click", () => {
-        const query = booksSubjectInput.value.trim().toLowerCase();
-        booksResults.innerHTML = "";
-
-        if (!query) {
-            booksEmpty.textContent = "Please enter a subject.";
-            booksEmpty.style.display = "block";
-            return;
-        }
-
-        const found = syllabusList.find(s => s.subject.toLowerCase() === query);
-
-        if (!found || found.books.length === 0) {
-            booksEmpty.textContent = "No books added for this subject.";
-            booksEmpty.style.display = "block";
-            return;
-        }
-
-        booksEmpty.style.display = "none";
-
-        const card = document.createElement("div");
-        card.className = "syllabus-card";
-        card.innerHTML = `
-            <div class="syllabus-subject">📖 Books for ${escapeHtml(found.subject)}</div>
-            <div class="books-section">
-                ${found.books.map((b, idx) => `
-                    <div class="book-item">
-                        <div class="book-title">${idx + 1}. ${escapeHtml(b.title)}</div>
-                        <div class="book-author">Author: ${escapeHtml(b.author)}</div>
-                    </div>
-                `).join('')}
-            </div>
-        `;
-        booksResults.appendChild(card);
-    });
-
-    function escapeHtml(text) {
-        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    }
+fetchSyllabus();
 </script>
+
 </body>
 </html>

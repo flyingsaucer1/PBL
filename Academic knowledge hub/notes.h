@@ -24,4 +24,3 @@ void addNoteFromData(const char* title,
 void printAllNotesAsJson();
 
 #endif // NOTES_H
-

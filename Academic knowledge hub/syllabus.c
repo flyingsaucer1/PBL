@@ -35,7 +35,7 @@ int compareIgnoreCase(const char* str1, const char* str2) {
     return (str1[i] == str2[i]);
 }
 
-
+// Load syllabus from file
 void loadSyllabus() {
     FILE* fp = fopen(SYLLABUS_FILE, "r");
     if (!fp) {
@@ -94,7 +94,7 @@ void loadSyllabus() {
             author[strcspn(author, "\n")] = 0;
         }
 
-       
+        // Find syllabus and add book
         SyllabusNode* s = syllabusListHead;
         while (s) {
             if (strcmp(s->subject, subject) == 0) {
@@ -138,7 +138,7 @@ void saveAllSyllabus() {
     fclose(fp);
 }
 
-
+// Save all books
 void saveAllBooks() {
     FILE* fp = fopen(BOOKS_FILE, "w");
     if (!fp) {
@@ -373,6 +373,110 @@ void viewBooksForSubject() {
 void initializeSyllabus() {
     loadSyllabus();
 }
+// ==========================
+// JSON HELPERS FOR BACKEND
+// ==========================
+
+void printAllSyllabusAsJson() {
+    printf("[");
+    SyllabusNode* s = syllabusListHead;
+    int firstSyl = 1;
+
+    while (s) {
+        if (!firstSyl) printf(",");
+        firstSyl = 0;
+
+        printf("{\"subject\":\"%s\",\"units\":\"%s\",\"books\":[", 
+               s->subject, s->units);
+
+        BookNode* b = s->books;
+        int firstBook = 1;
+        while (b) {
+            if (!firstBook) printf(",");
+            firstBook = 0;
+            printf("{\"title\":\"%s\",\"author\":\"%s\"}", b->title, b->author);
+            b = b->next;
+        }
+
+        printf("]}");
+        s = s->next;
+    }
+    printf("]");
+}
+
+// Add syllabus from Node backend
+void addSyllabusFromBackend(char* subject, char* units) {
+    SyllabusNode* s = (SyllabusNode*)malloc(sizeof(SyllabusNode));
+    strcpy(s->subject, subject);
+    strcpy(s->units, units);
+    s->books = NULL;
+    s->next = NULL;
+
+    if (!syllabusListHead) syllabusListHead = s;
+    else {
+        SyllabusNode* temp = syllabusListHead;
+        while (temp->next) temp = temp->next;
+        temp->next = s;
+    }
+
+    saveAllSyllabus();
+}
+
+// Add book for backend
+int addBookFromBackend(char* subject, char* title, char* author) {
+    SyllabusNode* s = syllabusListHead;
+
+    while (s) {
+        if (compareIgnoreCase(s->subject, subject)) {
+            BookNode* b = (BookNode*)malloc(sizeof(BookNode));
+            strcpy(b->title, title);
+            strcpy(b->author, author);
+            b->next = NULL;
+
+            if (!s->books) s->books = b;
+            else {
+                BookNode* tmp = s->books;
+                while (tmp->next) tmp = tmp->next;
+                tmp->next = b;
+            }
+
+            saveAllBooks();
+            return 1;
+        }
+        s = s->next;
+    }
+    return 0;
+}
+
+// Remove whole syllabus
+int removeSyllabusBySubject(char* subject) {
+    SyllabusNode *curr = syllabusListHead, *prev = NULL;
+
+    while (curr) {
+        if (compareIgnoreCase(curr->subject, subject)) {
+
+            // Remove books
+            BookNode* b = curr->books;
+            while (b) {
+                BookNode* next = b->next;
+                free(b);
+                b = next;
+            }
+
+            // Remove syllabus node
+            if (prev) prev->next = curr->next;
+            else syllabusListHead = curr->next;
+
+            free(curr);
+            saveAllBooks();
+            saveAllSyllabus();
+            return 1;
+        }
+        prev = curr;
+        curr = curr->next;
+    }
+    return 0;
+}
 
 void cleanupSyllabus() {
     SyllabusNode* s = syllabusListHead;
@@ -388,5 +492,4 @@ void cleanupSyllabus() {
         free(toFree);
     }
     syllabusListHead = NULL;
-
 }

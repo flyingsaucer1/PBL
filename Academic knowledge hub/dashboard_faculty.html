@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Faculty Dashboard - Academic Knowledge Hub</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: #f3f4f6;
+            color: #111827;
+        }
+        .topbar {
+            background: #0f172a;
+            color: white;
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 6px rgba(15,23,42,0.7);
+        }
+        .brand {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        .user-info {
+            font-size: 0.9rem;
+        }
+        .logout-btn {
+            margin-left: 10px;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            border-radius: 999px;
+            border: none;
+            background: #ef4444;
+            color: white;
+            cursor: pointer;
+        }
+        .layout {
+            display: flex;
+            min-height: calc(100vh - 52px);
+        }
+        .sidebar {
+            width: 230px;
+            background: #111827;
+            color: #e5e7eb;
+            padding: 16px 0;
+        }
+        .sidebar h3 {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            padding: 0 16px;
+            margin-bottom: 8px;
+            color: #9ca3af;
+        }
+        .nav-item {
+            padding: 10px 18px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: block;
+            color: #e5e7eb;
+            text-decoration: none;
+        }
+        .nav-item:hover {
+            background: #1f2937;
+        }
+        .nav-item span {
+            margin-right: 6px;
+        }
+        .content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .welcome {
+            margin-bottom: 16px;
+        }
+        .welcome h1 {
+            font-size: 1.6rem;
+            margin-bottom: 4px;
+        }
+        .welcome p {
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 10px rgba(15,23,42,0.06);
+        }
+        .card h3 {
+            font-size: 1rem;
+            margin-bottom: 6px;
+        }
+        .card p {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+        .card a {
+            display: inline-block;
+            margin-top: 4px;
+            text-decoration: none;
+            font-size: 0.8rem;
+            padding: 5px 10px;
+            border-radius: 999px;
+            background: #2563eb;
+            color: white;
+        }
+        .pill-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .pill {
+            font-size: 0.75rem;
+            padding: 3px 9px;
+            border-radius: 999px;
+            background: #e5e7eb;
+            color: #374151;
+        }
+        @media (max-width: 768px) {
+            .layout { flex-direction: column; }
+            .sidebar { width: 100%; display: flex; overflow-x: auto; }
+            .nav-item { display: inline-block; white-space: nowrap; }
+        }
+    </style>
+</head>
+<body>
+<div class="topbar">
+    <div class="brand">🎓 Academic Knowledge Hub — Faculty</div>
+    <div class="user-info">
+        <span id="userLabel">Faculty</span>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+</div>
+
+<div class="layout">
+    <aside class="sidebar">
+        <h3>Navigation</h3>
+        <a href="dashboard_faculty.html" class="nav-item"><span>🏠</span>Dashboard</a>
+        <a href="notes.html" class="nav-item"><span>📖</span>Manage Notes</a>
+        <a href="doubt.html" class="nav-item"><span>❓</span>Answer Doubts</a>
+        <a href="community.html" class="nav-item"><span>💬</span>Community Posts</a>
+        <a href="quiz.html" class="nav-item"><span>✅</span>Create Quizzes</a>
+        <a href="syllabus.html" class="nav-item"><span>📚</span>Update Syllabus</a>
+        <a href="faculty.html" class="nav-item"><span>👨‍🏫</span>Faculty List</a>
+    </aside>
+
+    <main class="content">
+        <div class="welcome">
+            <h1 id="welcomeTitle">Welcome, Professor 👋</h1>
+            <p>Use this dashboard to manage content for students: notes, quizzes, doubts and syllabus.</p>
+        </div>
+
+        <div class="pill-row">
+            <span class="pill">Role: <span id="roleLabel">faculty</span></span>
+            <span class="pill">Content Manager</span>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h3>📖 Upload / Manage Notes</h3>
+                <p>Add new notes for your subjects. Students can access them instantly.</p>
+                <a href="notes.html">Open Notes Module</a>
+            </div>
+            <div class="card">
+                <h3>❓ Pending Doubts</h3>
+                <p>Answer student doubts from the doubt module.</p>
+                <a href="doubt.html">Open Doubt Module</a>
+            </div>
+            <div class="card">
+                <h3>✅ Create & Update Quizzes</h3>
+                <p>Create MCQ based quizzes using your quiz module backend.</p>
+                <a href="quiz.html">Open Quiz Module</a>
+            </div>
+            <div class="card">
+                <h3>📚 Manage Syllabus & Books</h3>
+                <p>Maintain unit-wise syllabus and reference book list.</p>
+                <a href="syllabus.html">Open Syllabus Module</a>
+            </div>
+            <div class="card">
+                <h3>💬 Community Posts</h3>
+                <p>Post announcements, clarify common doubts, interact with students.</p>
+                <a href="community.html">Open Community</a>
+            </div>
+            <div class="card">
+                <h3>👨‍🏫 Faculty Directory</h3>
+                <p>Verify faculty entries, subjects and departments.</p>
+                <a href="faculty.html">View Faculty</a>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    function loadSession() {
+        const raw = localStorage.getItem("akhUser");
+        if (!raw) {
+            window.location.href = "index.html";
+            return;
+        }
+        try {
+            const session = JSON.parse(raw);
+            document.getElementById("userLabel").textContent =
+                session.username + " (" + session.role + ")";
+            document.getElementById("welcomeTitle").textContent =
+                "Welcome, " + session.username + " 👋";
+            document.getElementById("roleLabel").textContent = session.role;
+        } catch {
+            window.location.href = "index.html";
+        }
+    }
+
+    function logout() {
+        localStorage.removeItem("akhUser");
+        window.location.href = "index.html";
+    }
+
+    loadSession();
+</script>
+</body>
+</html>
