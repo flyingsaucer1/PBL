@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Quiz Module - Academic Knowledge Hub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: #f3f4f6;
+      color: #111827;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+    header p {
+      color: #6b7280;
+      font-size: 0.9rem;
+    }
+    .badge {
+      background: #eef2ff;
+      color: #4f46e5;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+    }
+    .card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+      margin-bottom: 20px;
+    }
+    .user-bar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+      font-size: 0.9rem;
+    }
+    .user-bar input {
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      outline: none;
+      font-size: 0.85rem;
+    }
+    .user-bar input:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 2px rgba(37,99,235,0.2);
+      background: #ffffff;
+    }
+    .btn {
+      border: none;
+      border-radius: 999px;
+      padding: 8px 18px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-primary {
+      background: #2563eb;
+      color: #ffffff;
+    }
+    .btn-primary:hover {
+      background: #1d4ed8;
+      box-shadow: 0 8px 18px rgba(37,99,235,0.35);
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #374151;
+    }
+    .btn-secondary:hover { background: #d1d5db; }
+    .status {
+      margin-top: 8px;
+      font-size: 0.85rem;
+    }
+    .status.error { color: #dc2626; }
+    .status.success { color: #16a34a; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+    .quiz-card {
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 16px;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 4px 12px rgba(15,23,42,0.04);
+    }
+    .quiz-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .quiz-meta {
+      font-size: 0.85rem;
+      color: #6b7280;
+      margin-bottom: 10px;
+    }
+    .question-card {
+      margin-top: 10px;
+      padding: 14px;
+      border-radius: 12px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+    }
+    .question-text {
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .options-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .options-list li {
+      margin-bottom: 6px;
+    }
+    .options-list label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    .options-list input {
+      accent-color: #2563eb;
+    }
+    .quiz-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .pill {
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      background: #e5e7eb;
+      color: #4b5563;
+    }
+    .score-box {
+      background: #ecfdf5;
+      border: 1px solid #bbf7d0;
+      padding: 12px;
+      border-radius: 10px;
+      margin-top: 10px;
+      font-size: 0.9rem;
+      color: #166534;
+    }
+    @media (max-width: 640px) {
+      .container { padding: 0; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div>
+      <h1>🧠 Quiz Center</h1>
+      <p>Attempt quizzes created by your faculty.</p>
+    </div>
+    <span class="badge">Module: quiz.c (C backend + Node API)</span>
+  </header>
+
+  <div class="card">
+    <div class="user-bar">
+      <span>Current student:</span>
+      <input type="text" id="studentNameInput" placeholder="Enter your name" />
+      <button class="btn btn-primary" id="setStudentBtn">Set</button>
+      <span id="currentStudentLabel" style="color:#6b7280;">(Guest)</span>
+    </div>
+    <div class="status" id="globalStatus"></div>
+  </div>
+
+  <!-- Quiz list -->
+  <div class="card" id="quizListSection">
+    <div class="quiz-header">
+      <h2 style="font-size:1.2rem;">Available Quizzes</h2>
+      <button class="btn btn-secondary" id="reloadQuizzesBtn">⟳ Reload</button>
+    </div>
+    <div id="quizList" class="grid"></div>
+    <div id="quizListEmpty" class="status" style="margin-top:10px; color:#6b7280; display:none;">
+      No quizzes available. Your faculty can create quizzes from the C module.
+    </div>
+  </div>
+
+  <!-- Active quiz / attempt section -->
+  <div class="card" id="activeQuizSection" style="display:none;">
+    <div class="quiz-header">
+      <div>
+        <h2 id="activeQuizTitle" style="font-size:1.2rem;"></h2>
+        <div class="quiz-meta" id="activeQuizMeta"></div>
+      </div>
+      <span class="pill" id="questionCounter"></span>
+    </div>
+
+    <div class="question-card">
+      <div class="question-text" id="questionText"></div>
+      <ul class="options-list">
+        <li><label><input type="radio" name="option" value="A"><span id="optA"></span></label></li>
+        <li><label><input type="radio" name="option" value="B"><span id="optB"></span></label></li>
+        <li><label><input type="radio" name="option" value="C"><span id="optC"></span></label></li>
+        <li><label><input type="radio" name="option" value="D"><span id="optD"></span></label></li>
+      </ul>
+    </div>
+
+    <div style="margin-top:12px; display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap;">
+      <button class="btn btn-secondary" id="cancelQuizBtn">⟵ Back to quizzes</button>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-secondary" id="prevQuestionBtn">◀ Prev</button>
+        <button class="btn btn-primary" id="nextQuestionBtn">Next ▶</button>
+        <button class="btn btn-primary" id="submitQuizBtn" style="display:none;">Submit ✅</button>
+      </div>
+    </div>
+
+    <div id="quizResultBox" class="score-box" style="display:none;"></div>
+  </div>
+</div>
+
+<script>
+  const API_URL = 'http://localhost:3000';
+
+  let currentStudent = 'Guest';
+  let currentQuiz = null;
+  let currentIndex = 0;
+  let answers = {};  // questionIndex -> 'A'/'B'/...
+
+  const studentNameInput = document.getElementById('studentNameInput');
+  const setStudentBtn = document.getElementById('setStudentBtn');
+  const currentStudentLabel = document.getElementById('currentStudentLabel');
+  const globalStatus = document.getElementById('globalStatus');
+
+  const quizListSection = document.getElementById('quizListSection');
+  const quizList = document.getElementById('quizList');
+  const quizListEmpty = document.getElementById('quizListEmpty');
+  const reloadQuizzesBtn = document.getElementById('reloadQuizzesBtn');
+
+  const activeQuizSection = document.getElementById('activeQuizSection');
+  const activeQuizTitle = document.getElementById('activeQuizTitle');
+  const activeQuizMeta = document.getElementById('activeQuizMeta');
+  const questionCounter = document.getElementById('questionCounter');
+
+  const questionText = document.getElementById('questionText');
+  const optA = document.getElementById('optA');
+  const optB = document.getElementById('optB');
+  const optC = document.getElementById('optC');
+  const optD = document.getElementById('optD');
+
+  const cancelQuizBtn = document.getElementById('cancelQuizBtn');
+  const prevQuestionBtn = document.getElementById('prevQuestionBtn');
+  const nextQuestionBtn = document.getElementById('nextQuestionBtn');
+  const submitQuizBtn = document.getElementById('submitQuizBtn');
+  const quizResultBox = document.getElementById('quizResultBox');
+
+  function setStatus(message, type = '') {
+    globalStatus.textContent = message || '';
+    globalStatus.className = 'status ' + (type ? type : '');
+  }
+
+  setStudentBtn.addEventListener('click', () => {
+    const name = studentNameInput.value.trim();
+    currentStudent = name || 'Guest';
+    currentStudentLabel.textContent = `(${currentStudent})`;
+  });
+
+  async function loadQuizzes() {
+    setStatus('Loading quizzes...');
+    quizList.innerHTML = '';
+    quizListEmpty.style.display = 'none';
+
+    try {
+      const res = await fetch(`${API_URL}/api/quizzes`);
+      const data = await res.json();
+
+      if (!Array.isArray(data) || data.length === 0) {
+        quizListEmpty.style.display = 'block';
+        setStatus('');
+        return;
+      }
+
+      data.forEach(quiz => {
+        const card = document.createElement('div');
+        card.className = 'quiz-card';
+        card.innerHTML = `
+          <div class="quiz-title">${quiz.title}</div>
+          <div class="quiz-meta">Questions: ${quiz.totalQuestions}</div>
+          <button class="btn btn-primary">Start Quiz</button>
+        `;
+        const btn = card.querySelector('button');
+        btn.addEventListener('click', () => startQuiz(quiz.title));
+        quizList.appendChild(card);
+      });
+
+      setStatus('');
+    } catch (err) {
+      console.error(err);
+      setStatus('✗ Cannot connect to backend server (quizzes).', 'error');
+    }
+  }
+
+  reloadQuizzesBtn.addEventListener('click', loadQuizzes);
+
+  async function startQuiz(title) {
+    setStatus('Loading quiz...');
+    quizResultBox.style.display = 'none';
+
+    try {
+      const res = await fetch(`${API_URL}/api/quizzes/${encodeURIComponent(title)}`);
+      if (res.status === 404) {
+        setStatus('Quiz not found. It may have been removed.', 'error');
+        return;
+      }
+      const data = await res.json();
+      if (!data || !Array.isArray(data.questions) || data.questions.length === 0) {
+        setStatus('This quiz has no questions.', 'error');
+        return;
+      }
+
+      currentQuiz = data;
+      currentIndex = 0;
+      answers = {};
+      quizListSection.style.display = 'none';
+      activeQuizSection.style.display = 'block';
+
+      activeQuizTitle.textContent = data.title;
+      activeQuizMeta.textContent = `Total Questions: ${data.questions.length}`;
+      quizResultBox.style.display = 'none';
+
+      renderQuestion();
+      setStatus('');
+    } catch (err) {
+      console.error(err);
+      setStatus('✗ Cannot connect to backend server (quiz details).', 'error');
+    }
+  }
+
+  function renderQuestion() {
+    if (!currentQuiz) return;
+
+    const total = currentQuiz.questions.length;
+    const q = currentQuiz.questions[currentIndex];
+
+    questionText.textContent = q.question;
+    optA.textContent = q.optionA;
+    optB.textContent = q.optionB;
+    optC.textContent = q.optionC;
+    optD.textContent = q.optionD;
+
+    questionCounter.textContent = `Question ${currentIndex + 1} of ${total}`;
+
+    document.querySelectorAll('input[name="option"]').forEach(r => {
+      r.checked = false;
+    });
+
+    if (answers[currentIndex]) {
+      const v = answers[currentIndex];
+      const radio = document.querySelector(`input[name="option"][value="${v}"]`);
+      if (radio) radio.checked = true;
+    }
+
+    prevQuestionBtn.disabled = (currentIndex === 0);
+    nextQuestionBtn.style.display = (currentIndex < total - 1) ? 'inline-flex' : 'none';
+    submitQuizBtn.style.display = (currentIndex === total - 1) ? 'inline-flex' : 'none';
+  }
+
+  function captureCurrentAnswer() {
+    const checked = document.querySelector('input[name="option"]:checked');
+    if (checked) {
+      answers[currentIndex] = checked.value;
+    }
+  }
+
+  prevQuestionBtn.addEventListener('click', () => {
+    captureCurrentAnswer();
+    if (currentIndex > 0) {
+      currentIndex--;
+      renderQuestion();
+    }
+  });
+
+  nextQuestionBtn.addEventListener('click', () => {
+    captureCurrentAnswer();
+    if (currentIndex < currentQuiz.questions.length - 1) {
+      currentIndex++;
+      renderQuestion();
+    }
+  });
+
+  submitQuizBtn.addEventListener('click', () => {
+    captureCurrentAnswer();
+    computeScore();
+  });
+
+  function computeScore() {
+    if (!currentQuiz) return;
+    const total = currentQuiz.questions.length;
+    let score = 0;
+
+    currentQuiz.questions.forEach((q, idx) => {
+      if (answers[idx] && answers[idx] === q.correct) {
+        score++;
+      }
+    });
+
+    const percentage = (score * 100.0) / total;
+    quizResultBox.style.display = 'block';
+    quizResultBox.innerHTML = `
+      <div><strong>Quiz:</strong> ${currentQuiz.title}</div>
+      <div><strong>Student:</strong> ${currentStudent}</div>
+      <div><strong>Score:</strong> ${score} / ${total}</div>
+      <div><strong>Percentage:</strong> ${percentage.toFixed(2)}%</div>
+    `;
+  }
+
+  cancelQuizBtn.addEventListener('click', () => {
+    activeQuizSection.style.display = 'none';
+    quizListSection.style.display = 'block';
+    currentQuiz = null;
+    answers = {};
+  });
+
+  loadQuizzes();
+</script>
+</body>
+</html>

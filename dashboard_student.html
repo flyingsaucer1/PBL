@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Dashboard - Academic Knowledge Hub</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: #f3f4f6;
+            color: #111827;
+        }
+        .topbar {
+            background: #1e3a8a;
+            color: white;
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 6px rgba(15,23,42,0.3);
+        }
+        .brand {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        .user-info {
+            font-size: 0.9rem;
+        }
+        .user-info span {
+            opacity: 0.9;
+        }
+        .logout-btn {
+            margin-left: 10px;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            border-radius: 999px;
+            border: none;
+            background: #f97316;
+            color: white;
+            cursor: pointer;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 24px auto;
+            padding: 0 16px;
+        }
+        .welcome {
+            margin-bottom: 16px;
+        }
+        .welcome h1 {
+            font-size: 1.6rem;
+            margin-bottom: 4px;
+        }
+        .welcome p {
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 10px rgba(15,23,42,0.06);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 140px;
+        }
+        .card h3 {
+            font-size: 1.05rem;
+            margin-bottom: 6px;
+        }
+        .card p {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-bottom: 10px;
+        }
+        .card a {
+            align-self: flex-start;
+            text-decoration: none;
+            font-size: 0.85rem;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: #1e3a8a;
+            color: white;
+        }
+        .stats-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        .pill {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: #e5e7eb;
+            color: #374151;
+        }
+    </style>
+</head>
+<body>
+<div class="topbar">
+    <div class="brand">🎓 Academic Knowledge Hub — Student</div>
+    <div class="user-info">
+        <span id="userLabel">Student</span>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+</div>
+
+<div class="container">
+    <div class="welcome">
+        <h1 id="welcomeTitle">Welcome, Student 👋</h1>
+        <p>Access your notes, quizzes, doubts, community and syllabus in one place.</p>
+    </div>
+
+    <div class="stats-row">
+        <span class="pill">Role: <span id="roleLabel">student</span></span>
+        <span class="pill">Logged in</span>
+    </div>
+
+    <div class="grid">
+        <div class="card">
+            <h3>📖 Notes & Lectures</h3>
+            <p>View and download faculty uploaded notes topic-wise.</p>
+            <a href="notes.html">Open Notes</a>
+        </div>
+        <div class="card">
+            <h3>❓ Doubt Resolution</h3>
+            <p>Post doubts and see solutions by faculty.</p>
+            <a href="doubt.html">Ask Doubt</a>
+        </div>
+        <div class="card">
+            <h3>💬 Community Forum</h3>
+            <p>Discuss concepts, share tips and interact with classmates.</p>
+            <a href="community.html">Open Community</a>
+        </div>
+        <div class="card">
+            <h3>📚 Syllabus & Books</h3>
+            <p>View subject-wise syllabus with reference books.</p>
+            <a href="syllabus.html">View Syllabus</a>
+        </div>
+        <div class="card">
+            <h3>✅ Quizzes</h3>
+            <p>Attempt MCQ quizzes to practice each subject.</p>
+            <a href="quiz.html">Start Quiz</a>
+        </div>
+        <div class="card">
+            <h3>👨‍🏫 Faculty Directory</h3>
+            <p>See faculty list and their subjects.</p>
+            <a href="faculty.html">View Faculty</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    function loadSession() {
+        const raw = localStorage.getItem("akhUser");
+        if (!raw) {
+            // no session, go back to login
+            window.location.href = "index.html";
+            return;
+        }
+        try {
+            const session = JSON.parse(raw);
+            document.getElementById("userLabel").textContent =
+                session.username + " (" + session.role + ")";
+            document.getElementById("welcomeTitle").textContent =
+                "Welcome, " + session.username + " 👋";
+            document.getElementById("roleLabel").textContent = session.role;
+        } catch {
+            window.location.href = "index.html";
+        }
+    }
+
+    function logout() {
+        localStorage.removeItem("akhUser");
+        window.location.href = "index.html";
+    }
+
+    loadSession();
+</script>
+</body>
+</html>

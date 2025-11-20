@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academic Knowledge Hub - Login / Register</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
+                        url('https://image-static.collegedunia.com/public/reviewPhotos/1120919/g1.jpg') center/cover fixed;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(30,60,114,0.4);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            max-width: 1200px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: 600px;
+        }
+
+        .left-panel {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            padding: 50px 40px;
+            color: white;
+            border-radius: 20px 0 0 20px;
+        }
+
+        .university-logo {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .university-logo img {
+            width: 100%;
+            max-width: 220px;
+        }
+
+        .university-details {
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-left: 3px solid rgba(255,255,255,0.5);
+        }
+
+        .university-details p {
+            font-size: 0.9em;
+            margin: 3px 0;
+        }
+
+        .left-panel h1 {
+            font-size: 2.3em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 1em;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            margin: 6px 0;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            font-size: 0.9em;
+        }
+
+        .feature-icon { margin-right: 8px; }
+
+        .right-panel {
+            padding: 50px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .form-box {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: #f0f0f0;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: 0.2s;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+        }
+
+        .form-section { display: none; }
+        .form-section.active { display: block; }
+
+        .form-group { margin-bottom: 15px; }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.95em;
+            outline: none;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: #2a5298;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(30,60,114,0.4);
+        }
+
+        .alert {
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 0.85em;
+            display: none;
+        }
+
+        .alert.show { display: block; }
+        .alert-success { background: #d4edda; color: #155724; }
+        .alert-error { background: #f8d7da; color: #721c24; }
+
+        @media (max-width: 768px) {
+            .container { grid-template-columns: 1fr; }
+            .left-panel { border-radius: 20px 20px 0 0; padding: 30px; }
+            .right-panel { padding: 25px; }
+            .form-box { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="left-panel">
+        <div class="university-logo">
+            <img src="https://d2lk14jtvqry1q.cloudfront.net/media/small_Graphic_Era_University_Dehradun_60a88d888d_ac395cbadc_3cd08bad28.png" alt="Graphic Era University Logo">
+        </div>
+        <div class="university-details">
+            <p>📍 Dehradun, Uttarakhand</p>
+            <p>📍 India</p>
+        </div>
+        <h1>📚 Academic Knowledge Hub</h1>
+        <p class="subtitle">Single portal for notes, quizzes, discussions, syllabus & doubt resolution.</p>
+        <div class="features-list">
+            <div class="feature-item"><span class="feature-icon">📖</span><span>Faculty uploaded notes & lectures</span></div>
+            <div class="feature-item"><span class="feature-icon">✍️</span><span>MCQ quizzes per subject</span></div>
+            <div class="feature-item"><span class="feature-icon">💬</span><span>Student community & Q/A</span></div>
+            <div class="feature-item"><span class="feature-icon">🎯</span><span>Syllabus + reference books in one place</span></div>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <div class="form-box" id="authSection">
+            <div class="auth-tabs">
+                <button class="tab-btn active" data-target="loginForm">Login</button>
+                <button class="tab-btn" data-target="registerForm">Register</button>
+            </div>
+            <div id="alertBox" class="alert"></div>
+
+            <!-- LOGIN -->
+            <div id="loginForm" class="form-section active">
+                <form id="loginFormEl">
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" id="loginUsername" required placeholder="Enter your username">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="loginPassword" required placeholder="Enter your password">
+                    </div>
+                    <button type="submit" class="btn-primary">Sign In</button>
+                </form>
+            </div>
+
+            <!-- REGISTER -->
+            <div id="registerForm" class="form-section">
+                <form id="registerFormEl">
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" id="regUsername" required minlength="3" placeholder="Choose a username">
+                    </div>
+                    <div class="form-group">
+                        <label>Email (@geu.ac.in)</label>
+                        <input type="email" id="regEmail" required placeholder="your.email@geu.ac.in">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="regPassword" required minlength="6" placeholder="Create a strong password">
+                    </div>
+                    <div class="form-group">
+                        <label>Account Type</label>
+                        <select id="regRole" required>
+                            <option value="">Select Role</option>
+                            <option value="student">Student</option>
+                            <option value="faculty">Faculty</option>
+                            <option value="admin">Administrator</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-primary">Create Account</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_URL = "http://localhost:3000";
+
+    const tabButtons = document.querySelectorAll(".tab-btn");
+    const sections = document.querySelectorAll(".form-section");
+    const alertBox = document.getElementById("alertBox");
+
+    tabButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            tabButtons.forEach(b => b.classList.remove("active"));
+            sections.forEach(s => s.classList.remove("active"));
+            btn.classList.add("active");
+            document.getElementById(btn.dataset.target).classList.add("active");
+            hideAlert();
+        });
+    });
+
+    function showAlert(message, type) {
+        alertBox.textContent = message;
+        alertBox.className = "alert alert-" + type + " show";
+    }
+
+    function hideAlert() {
+        alertBox.className = "alert";
+        alertBox.textContent = "";
+    }
+
+    // REGISTER
+    document.getElementById("registerFormEl").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        hideAlert();
+
+        const username = document.getElementById("regUsername").value.trim();
+        const email = document.getElementById("regEmail").value.trim();
+        const password = document.getElementById("regPassword").value;
+        const role = document.getElementById("regRole").value;
+
+        try {
+            const res = await fetch(`${API_URL}/register`, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({ username, email, password, role })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                showAlert("✓ " + data.message, "success");
+                e.target.reset();
+                // switch to login tab after 1.5s
+                setTimeout(() => tabButtons[0].click(), 1500);
+            } else {
+                showAlert("✗ " + (data.message || "Registration failed"), "error");
+            }
+        } catch (err) {
+            showAlert("✗ Cannot connect to backend server.", "error");
+        }
+    });
+
+    // LOGIN
+    document.getElementById("loginFormEl").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        hideAlert();
+
+        const username = document.getElementById("loginUsername").value.trim();
+        const password = document.getElementById("loginPassword").value;
+
+        try {
+            const res = await fetch(`${API_URL}/login`, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({ username, password })
+            });
+            const data = await res.json();
+
+            if (!data.success) {
+                showAlert("✗ " + (data.message || "Login failed"), "error");
+                return;
+            }
+
+            // Save session in localStorage
+            const session = {
+                username,
+                role: data.role || "student",
+                token: data.token || "",
+                userId: data.userId || username
+            };
+            localStorage.setItem("akhUser", JSON.stringify(session));
+
+            // Redirect by role
+            if (session.role === "faculty" || session.role === "admin") {
+                window.location.href = "dashboard_faculty.html";
+            } else {
+                window.location.href = "dashboard_student.html";
+            }
+        } catch (err) {
+            showAlert("✗ Cannot connect to backend server.", "error");
+        }
+    });
+</script>
+<a href="notes.html">Go to Notes</a>
+</body>
+</html>

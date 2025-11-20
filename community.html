@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Community - Academic Knowledge Hub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: system-ui, sans-serif; background:#f3f4f6; margin:0; padding:20px; }
+    .container { max-width: 1000px; margin: 0 auto; }
+    h1 { margin-bottom: 4px; }
+    .subtitle { color:#6b7280; font-size:0.9rem; margin-bottom:16px; }
+    .row { display:flex; flex-wrap:wrap; gap:16px; }
+    .card { background:#fff; padding:16px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.05); flex:1; min-width:280px; }
+    label { display:block; margin:6px 0 2px; font-size:0.9rem; }
+    input, textarea { width:100%; padding:6px 8px; border-radius:8px; border:1px solid #d1d5db; font-size:0.9rem; }
+    textarea { min-height:70px; resize:vertical; }
+    button { margin-top:8px; padding:8px 14px; border-radius:999px; border:none; background:#2563eb; color:#fff; cursor:pointer; font-size:0.9rem; }
+    button:hover { background:#1d4ed8; }
+    .status { margin-top:6px; font-size:0.85rem; }
+    .status.ok { color:#16a34a; }
+    .status.err { color:#dc2626; }
+    .post-list { display:flex; flex-direction:column; gap:8px; max-height:400px; overflow-y:auto; }
+    .post-item { padding:8px; border-radius:8px; border:1px solid #e5e7eb; background:#fff; cursor:pointer; }
+    .post-item:hover { background:#eff6ff; }
+    .post-title { font-weight:600; }
+    .post-meta { font-size:0.8rem; color:#6b7280; }
+    .post-content { font-size:0.9rem; margin-top:2px; }
+    .badge { display:inline-block; padding:2px 6px; border-radius:999px; background:#eff6ff; color:#1d4ed8; font-size:0.75rem; margin-left:4px; }
+    .comments { margin-top:8px; border-top:1px solid #e5e7eb; padding-top:8px; max-height:220px; overflow-y:auto; }
+    .comment { padding:6px 0; border-bottom:1px solid #f3f4f6; }
+    .comment-author { font-weight:600; font-size:0.85rem; }
+    .comment-text { font-size:0.85rem; }
+    .empty { font-size:0.85rem; color:#6b7280; margin-top:4px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Community</h1>
+  <div class="subtitle">
+    Powered by your C backend via Node at <code>http://localhost:3000</code>
+  </div>
+
+  <div class="row">
+    <!-- Left: create post + list -->
+    <div class="card" style="flex:1.1;">
+      <h2 style="margin-top:0;">Create New Post</h2>
+      <form id="postForm">
+        <label for="postTitle">Title *</label>
+        <input id="postTitle" required>
+
+        <label for="postAuthor">Author *</label>
+        <input id="postAuthor" required value="Aishika">
+
+        <label for="postContent">Content *</label>
+        <textarea id="postContent" required></textarea>
+
+        <button type="submit">Publish Post</button>
+        <div id="postFormStatus" class="status"></div>
+      </form>
+
+      <hr style="margin:14px 0; border:none; border-top:1px solid #e5e7eb;">
+
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+        <h3 style="margin:0;">Community Feed</h3>
+        <button type="button" id="refreshPostsBtn" style="padding:4px 10px; font-size:0.8rem;">Refresh</button>
+      </div>
+      <div id="postsStatus" class="status"></div>
+      <div id="postsList" class="post-list"></div>
+    </div>
+
+    <!-- Right: selected post + comments -->
+    <div class="card" style="flex:1;">
+      <h2 style="margin-top:0;">Post Details & Comments</h2>
+      <div id="selectedPost">
+        <div class="empty">Select a post from the left to view details and comments.</div>
+      </div>
+
+      <div id="commentSection" style="margin-top:10px; display:none;">
+        <h3 style="margin:8px 0 4px;">Add Comment</h3>
+        <form id="commentForm">
+          <label for="commentAuthor">Your Name *</label>
+          <input id="commentAuthor" required value="Aishika">
+
+          <label for="commentText">Comment *</label>
+          <textarea id="commentText" required></textarea>
+
+          <button type="submit">Post Comment</button>
+          <div id="commentFormStatus" class="status"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API_BASE = "http://localhost:3000";
+
+  const postForm = document.getElementById("postForm");
+  const postFormStatus = document.getElementById("postFormStatus");
+  const postsList = document.getElementById("postsList");
+  const postsStatus = document.getElementById("postsStatus");
+  const refreshPostsBtn = document.getElementById("refreshPostsBtn");
+
+  const selectedPostContainer = document.getElementById("selectedPost");
+  const commentSection = document.getElementById("commentSection");
+  const commentForm = document.getElementById("commentForm");
+  const commentFormStatus = document.getElementById("commentFormStatus");
+
+  let postsCache = [];
+  let selectedPostTitle = null;
+
+  function escapeHtml(text) {
+    return String(text || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  async function loadPosts() {
+    postsStatus.textContent = "Loading posts...";
+    postsStatus.className = "status";
+    postsList.innerHTML = "";
+    try {
+      const resp = await fetch(`${API_BASE}/api/posts`);
+      const data = await resp.json();
+      postsCache = Array.isArray(data) ? data : [];
+      if (postsCache.length === 0) {
+        postsStatus.textContent = "No posts yet. Be the first to post!";
+        return;
+      }
+      postsStatus.textContent = "";
+      postsCache.forEach(post => {
+        const div = document.createElement("div");
+        div.className = "post-item";
+        div.onclick = () => selectPost(post.title);
+        div.innerHTML = `
+          <div class="post-title">${escapeHtml(post.title)}</div>
+          <div class="post-meta">
+            By ${escapeHtml(post.author)} on ${escapeHtml(post.date)}
+            <span class="badge">${post.commentsCount || 0} comments</span>
+          </div>
+          <div class="post-content">${escapeHtml(post.content)}</div>
+        `;
+        postsList.appendChild(div);
+      });
+    } catch (err) {
+      console.error(err);
+      postsStatus.textContent = "Error loading posts from backend.";
+      postsStatus.className = "status err";
+    }
+  }
+
+  postForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    postFormStatus.textContent = "";
+    postFormStatus.className = "status";
+
+    const title = document.getElementById("postTitle").value.trim();
+    const author = document.getElementById("postAuthor").value.trim();
+    const content = document.getElementById("postContent").value.trim();
+
+    if (!title || !author || !content) {
+      postFormStatus.textContent = "Please fill all fields.";
+      postFormStatus.className = "status err";
+      return;
+    }
+
+    try {
+      const resp = await fetch(`${API_BASE}/api/posts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, author, content })
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        throw new Error(data.error || "Backend error");
+      }
+      postFormStatus.textContent = "✅ Post published!";
+      postFormStatus.className = "status ok";
+      postForm.reset();
+      await loadPosts();
+    } catch (err) {
+      console.error(err);
+      postFormStatus.textContent = "Error publishing post.";
+      postFormStatus.className = "status err";
+    }
+  });
+
+  refreshPostsBtn.addEventListener("click", loadPosts);
+
+  async function selectPost(title) {
+    selectedPostTitle = title;
+    selectedPostContainer.innerHTML = `<div class="empty">Loading post...</div>`;
+    commentSection.style.display = "none";
+    commentFormStatus.textContent = "";
+    commentFormStatus.className = "status";
+
+    try {
+      const resp = await fetch(`${API_BASE}/api/posts/${encodeURIComponent(title)}`);
+      if (resp.status === 404) {
+        selectedPostContainer.innerHTML = `<div class="empty">Post not found.</div>`;
+        return;
+      }
+      const post = await resp.json();
+      const commentsHtml = (post.comments && post.comments.length)
+        ? post.comments.map(c => `
+            <div class="comment">
+              <div class="comment-author">${escapeHtml(c.author)}</div>
+              <div class="comment-text">${escapeHtml(c.text)}</div>
+            </div>
+          `).join("")
+        : `<div class="empty">No comments yet. Be the first to comment!</div>`;
+
+      selectedPostContainer.innerHTML = `
+        <div class="post-title">${escapeHtml(post.title)}</div>
+        <div class="post-meta">
+          By ${escapeHtml(post.author)} on ${escapeHtml(post.date)}
+        </div>
+        <div class="post-content" style="margin-top:4px;">${escapeHtml(post.content)}</div>
+        <div class="comments">
+          <h3 style="margin:6px 0;">Comments</h3>
+          ${commentsHtml}
+        </div>
+      `;
+      commentSection.style.display = "block";
+    } catch (err) {
+      console.error(err);
+      selectedPostContainer.innerHTML = `<div class="empty">Error loading post details.</div>`;
+    }
+  }
+
+  commentForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    commentFormStatus.textContent = "";
+    commentFormStatus.className = "status";
+
+    if (!selectedPostTitle) {
+      commentFormStatus.textContent = "Select a post first.";
+      commentFormStatus.className = "status err";
+      return;
+    }
+
+    const author = document.getElementById("commentAuthor").value.trim();
+    const text = document.getElementById("commentText").value.trim();
+
+    if (!author || !text) {
+      commentFormStatus.textContent = "Please fill all fields.";
+      commentFormStatus.className = "status err";
+      return;
+    }
+
+    try {
+      const resp = await fetch(`${API_BASE}/api/posts/${encodeURIComponent(selectedPostTitle)}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ author, text })
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        throw new Error(data.error || "Backend error");
+      }
+      commentFormStatus.textContent = "✅ Comment added!";
+      commentFormStatus.className = "status ok";
+      commentForm.reset();
+      await selectPost(selectedPostTitle);
+      await loadPosts();
+    } catch (err) {
+      console.error(err);
+      commentFormStatus.textContent = "Error adding comment.";
+      commentFormStatus.className = "status err";
+    }
+  });
+
+  // Initial load
+  loadPosts();
+</script>
+</body>
+</html>

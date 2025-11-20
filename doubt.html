@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Doubt Resolution System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        body {
+            background: #f3f4f6;
+            color: #111827;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        header span {
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 999px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            font-size: 0.75rem;
+        }
+
+        .user-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        .user-bar input {
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid #d1d5db;
+            background: #f9fafb;
+            outline: none;
+            font-size: 0.85rem;
+        }
+
+        .user-bar input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+            background: #ffffff;
+        }
+
+        .user-bar select {
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid #d1d5db;
+            background: #f9fafb;
+            outline: none;
+            font-size: 0.85rem;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
+            margin-bottom: 20px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            border: none;
+            background: #e5e7eb;
+            padding: 8px 16px;
+            border-radius: 999px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            background: #2563eb;
+            color: #ffffff;
+        }
+
+        .tab-btn:hover {
+            background: #d1d5db;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 10px;
+            border: 1px solid #d1d5db;
+            font-size: 0.9rem;
+            outline: none;
+            background: #f9fafb;
+            transition: border 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+            background: #ffffff;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 999px;
+            border: none;
+            background: #2563eb;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            box-shadow: 0 8px 18px rgba(37, 99, 235, 0.35);
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background: #16a34a;
+        }
+
+        .btn-success:hover {
+            background: #15803d;
+        }
+
+        .btn-secondary {
+            border: none;
+            background: transparent;
+            color: #6b7280;
+            font-size: 0.85rem;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .status {
+            margin-top: 8px;
+            font-size: 0.85rem;
+        }
+
+        .status.success {
+            color: #16a34a;
+        }
+
+        .status.error {
+            color: #dc2626;
+        }
+
+        .doubts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        .doubt-card {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 14px 16px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+        }
+
+        .doubt-card.pending {
+            border-left: 4px solid #f59e0b;
+        }
+
+        .doubt-card.solved {
+            border-left: 4px solid #16a34a;
+        }
+
+        .doubt-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .doubt-student {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .doubt-status {
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .doubt-status.pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .doubt-status.solved {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .doubt-subject {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-bottom: 6px;
+        }
+
+        .doubt-text {
+            font-size: 0.9rem;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .doubt-solution {
+            background: #f0fdf4;
+            padding: 8px;
+            border-radius: 8px;
+            margin-top: 8px;
+            font-size: 0.85rem;
+        }
+
+        .doubt-solver {
+            font-size: 0.75rem;
+            color: #16a34a;
+            margin-top: 4px;
+        }
+
+        .empty-state {
+            padding: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
+        .solve-form {
+            background: #f9fafb;
+            padding: 12px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 640px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <div>
+            <h1>❓ Doubt Resolution System</h1>
+            <span>Post doubts, get solutions from faculty</span>
+        </div>
+        <span class="badge">Module: doubt.c</span>
+    </header>
+
+    <div class="card">
+        <div class="user-bar">
+            <span>Current user:</span>
+            <input type="text" id="usernameInput" placeholder="Enter username" />
+            <select id="roleSelect">
+                <option value="student">Student</option>
+                <option value="faculty">Faculty</option>
+            </select>
+            <button class="btn-primary" id="setUserBtn">Set</button>
+            <span id="currentUserLabel" style="color:#6b7280;">(Guest - Student)</span>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-target="tab-post">Post Doubt</button>
+            <button class="tab-btn" data-target="tab-pending">Pending Doubts</button>
+            <button class="tab-btn" data-target="tab-solved">Solved Doubts</button>
+            <button class="tab-btn" data-target="tab-my">My Doubts</button>
+        </div>
+
+        <!-- Post Doubt -->
+        <section id="tab-post" class="section active">
+            <h2 style="font-size:1.1rem;margin-bottom:10px;">📝 Post a Doubt</h2>
+            <form id="postDoubtForm">
+                <div class="form-group">
+                    <label for="doubtSubject">Subject *</label>
+                    <input type="text" id="doubtSubject" required placeholder="Enter subject">
+                </div>
+                <div class="form-group">
+                    <label for="doubtText">Your Doubt *</label>
+                    <textarea id="doubtText" required placeholder="Describe your doubt in detail"></textarea>
+                </div>
+                <button type="submit" class="btn-primary">Submit Doubt</button>
+                <button type="button" class="btn-secondary" id="clearDoubtBtn">Clear</button>
+                <div id="postDoubtStatus" class="status"></div>
+            </form>
+        </section>
+
+        <!-- Pending Doubts -->
+        <section id="tab-pending" class="section">
+            <h2 style="font-size:1.1rem;margin-bottom:10px;">⏳ Pending Doubts</h2>
+            <div id="pendingDoubtsContainer" class="doubts-grid"></div>
+            <div id="pendingEmpty" class="empty-state" style="display:none;">
+                ✅ No pending doubts! Great work.
+            </div>
+        </section>
+
+        <!-- Solved Doubts -->
+        <section id="tab-solved" class="section">
+            <h2 style="font-size:1.1rem;margin-bottom:10px;">✅ Solved Doubts</h2>
+            <div id="solvedDoubtsContainer" class="doubts-grid"></div>
+            <div id="solvedEmpty" class="empty-state" style="display:none;">
+                No solved doubts yet.
+            </div>
+        </section>
+
+        <!-- My Doubts -->
+        <section id="tab-my" class="section">
+            <h2 style="font-size:1.1rem;margin-bottom:10px;">📋 My Doubts</h2>
+            <div id="myDoubtsContainer" class="doubts-grid"></div>
+            <div id="myEmpty" class="empty-state" style="display:none;">
+                You haven't posted any doubts yet.
+            </div>
+        </section>
+    </div>
+</div>
+<script>
+    const API_URL = 'http://localhost:3000';
+    const DOUBTS_ENDPOINT = API_URL + '/api/doubts';
+
+    let currentUser = "Guest";
+    let currentRole = "student";
+
+    // User setup
+    const usernameInput = document.getElementById("usernameInput");
+    const roleSelect = document.getElementById("roleSelect");
+    const setUserBtn = document.getElementById("setUserBtn");
+    const currentUserLabel = document.getElementById("currentUserLabel");
+
+    setUserBtn.addEventListener("click", () => {
+        currentUser = usernameInput.value.trim() || "Guest";
+        currentRole = roleSelect.value;
+        currentUserLabel.textContent = `(${currentUser} - ${currentRole})`;
+    });
+
+    // Tabs
+    const tabButtons = document.querySelectorAll(".tab-btn");
+    const sections = document.querySelectorAll(".section");
+
+    tabButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            const targetId = btn.getAttribute("data-target");
+            tabButtons.forEach(b => b.classList.remove("active"));
+            sections.forEach(sec => sec.classList.remove("active"));
+            btn.classList.add("active");
+            document.getElementById(targetId).classList.add("active");
+
+            if (targetId === "tab-pending") loadPendingDoubts();
+            if (targetId === "tab-solved") loadSolvedDoubts();
+            if (targetId === "tab-my") loadMyDoubts();
+        });
+    });
+
+    // Post Doubt
+    const postDoubtForm = document.getElementById("postDoubtForm");
+    const postDoubtStatus = document.getElementById("postDoubtStatus");
+    const clearDoubtBtn = document.getElementById("clearDoubtBtn");
+
+    postDoubtForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const subject = document.getElementById("doubtSubject").value.trim();
+        const text = document.getElementById("doubtText").value.trim();
+
+        if (!subject || !text) {
+            postDoubtStatus.textContent = "Please fill all fields.";
+            postDoubtStatus.className = "status error";
+            return;
+        }
+
+        try {
+            const response = await fetch(DOUBTS_ENDPOINT, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    studentName: currentUser,
+                    subject,
+                    doubtText: text
+                })
+            });
+
+            if (!response.ok) {
+                postDoubtStatus.textContent = "✗ Failed to post doubt.";
+                postDoubtStatus.className = "status error";
+                return;
+            }
+
+            postDoubtStatus.textContent = "✅ Doubt posted successfully!";
+            postDoubtStatus.className = "status success";
+            postDoubtForm.reset();
+        } catch (err) {
+            console.error(err);
+            postDoubtStatus.textContent = "✗ Cannot connect to backend server.";
+            postDoubtStatus.className = "status error";
+        }
+    });
+
+    clearDoubtBtn.addEventListener("click", () => {
+        postDoubtForm.reset();
+        postDoubtStatus.textContent = "";
+        postDoubtStatus.className = "status";
+    });
+
+    // === Load & render functions ===
+
+    async function loadPendingDoubts() {
+        const container = document.getElementById("pendingDoubtsContainer");
+        const empty = document.getElementById("pendingEmpty");
+        container.innerHTML = "";
+        empty.style.display = "none";
+
+        try {
+            const res = await fetch(DOUBTS_ENDPOINT + "?status=pending");
+            const pending = await res.json();
+
+            if (!Array.isArray(pending) || pending.length === 0) {
+                empty.style.display = "block";
+                return;
+            }
+
+            pending.forEach((doubt, index) => {
+                const card = document.createElement("div");
+                card.className = "doubt-card pending";
+                const textareaId = `solution-${index}`;
+
+                card.innerHTML = `
+                    <div class="doubt-header">
+                        <div class="doubt-student">👤 ${escapeHtml(doubt.studentName)}</div>
+                        <span class="doubt-status pending">Pending</span>
+                    </div>
+                    <div class="doubt-subject">📚 ${escapeHtml(doubt.subject)}</div>
+                    <div class="doubt-text">${escapeHtml(doubt.doubtText)}</div>
+                    ${currentRole === "faculty" ? `
+                        <div class="solve-form">
+                            <textarea id="${textareaId}" placeholder="Enter solution..." style="width:100%;padding:6px;border-radius:6px;border:1px solid #d1d5db;font-size:0.85rem;min-height:60px;"></textarea>
+                            <button class="btn-success" style="margin-top:6px;font-size:0.85rem;padding:6px 12px;"
+                                onclick="solveDoubt('${encodeURIComponent(doubt.studentName)}', '${textareaId}')">
+                                ✅ Solve
+                            </button>
+                        </div>
+                    ` : ''}
+                `;
+                container.appendChild(card);
+            });
+        } catch (err) {
+            console.error(err);
+            empty.style.display = "block";
+            empty.textContent = "✗ Cannot load pending doubts.";
+        }
+    }
+
+    async function loadSolvedDoubts() {
+        const container = document.getElementById("solvedDoubtsContainer");
+        const empty = document.getElementById("solvedEmpty");
+        container.innerHTML = "";
+        empty.style.display = "none";
+
+        try {
+            const res = await fetch(DOUBTS_ENDPOINT + "?status=solved");
+            const solved = await res.json();
+
+            if (!Array.isArray(solved) || solved.length === 0) {
+                empty.style.display = "block";
+                return;
+            }
+
+            solved.forEach(doubt => {
+                const card = document.createElement("div");
+                card.className = "doubt-card solved";
+                card.innerHTML = `
+                    <div class="doubt-header">
+                        <div class="doubt-student">👤 ${escapeHtml(doubt.studentName)}</div>
+                        <span class="doubt-status solved">Solved</span>
+                    </div>
+                    <div class="doubt-subject">📚 ${escapeHtml(doubt.subject)}</div>
+                    <div class="doubt-text">${escapeHtml(doubt.doubtText)}</div>
+                    <div class="doubt-solution">
+                        <strong>💡 Solution:</strong><br>${escapeHtml(doubt.solution || "")}
+                        <div class="doubt-solver">✅ Solved by: ${escapeHtml(doubt.solvedBy || "")}</div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        } catch (err) {
+            console.error(err);
+            empty.style.display = "block";
+            empty.textContent = "✗ Cannot load solved doubts.";
+        }
+    }
+
+    async function loadMyDoubts() {
+        const container = document.getElementById("myDoubtsContainer");
+        const empty = document.getElementById("myEmpty");
+        container.innerHTML = "";
+        empty.style.display = "none";
+
+        if (!currentUser || currentUser === "Guest") {
+            empty.style.display = "block";
+            empty.textContent = "Set your username above to see your doubts.";
+            return;
+        }
+
+        try {
+            const res = await fetch(DOUBTS_ENDPOINT + "?student=" + encodeURIComponent(currentUser));
+            const myDoubts = await res.json();
+
+            if (!Array.isArray(myDoubts) || myDoubts.length === 0) {
+                empty.style.display = "block";
+                empty.textContent = "You haven't posted any doubts yet.";
+                return;
+            }
+
+            myDoubts.forEach(doubt => {
+                const card = document.createElement("div");
+                card.className = `doubt-card ${doubt.status}`;
+                card.innerHTML = `
+                    <div class="doubt-header">
+                        <div class="doubt-student">My Doubt</div>
+                        <span class="doubt-status ${doubt.status}">${escapeHtml(doubt.status)}</span>
+                    </div>
+                    <div class="doubt-subject">📚 ${escapeHtml(doubt.subject)}</div>
+                    <div class="doubt-text">${escapeHtml(doubt.doubtText)}</div>
+                    ${doubt.status === "solved" ? `
+                        <div class="doubt-solution">
+                            <strong>💡 Solution:</strong><br>${escapeHtml(doubt.solution || "")}
+                            <div class="doubt-solver">✅ Solved by: ${escapeHtml(doubt.solvedBy || "")}</div>
+                        </div>
+                    ` : ''}
+                `;
+                container.appendChild(card);
+            });
+        } catch (err) {
+            console.error(err);
+            empty.style.display = "block";
+            empty.textContent = "✗ Cannot load your doubts.";
+        }
+    }
+
+    // Solve Doubt (faculty)
+    window.solveDoubt = async function(encodedStudentName, textareaId) {
+        const studentName = decodeURIComponent(encodedStudentName);
+        const textarea = document.getElementById(textareaId);
+        if (!textarea) return;
+
+        const solutionText = textarea.value.trim();
+        if (!solutionText) {
+            alert("Please enter a solution!");
+            return;
+        }
+
+        try {
+            const res = await fetch(API_URL + "/api/doubts/solve", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    studentName,
+                    facultyName: currentUser,
+                    solution: solutionText
+                })
+            });
+
+            const data = await res.json();
+            if (!data.success) {
+                alert("✗ " + (data.message || "Failed to mark doubt as solved."));
+                return;
+            }
+
+            alert("Doubt solved successfully!");
+            // Refresh lists
+            loadPendingDoubts();
+            loadSolvedDoubts();
+        } catch (err) {
+            console.error(err);
+            alert("✗ Cannot connect to backend server.");
+        }
+    };
+
+    function escapeHtml(text) {
+        if (!text) return "";
+        return text
+            .toString()
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+    }
+</script>
+
+</body>
+</html>

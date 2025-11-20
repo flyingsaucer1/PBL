@@ -1,0 +1,4 @@
+Aishika|DSA|What is the difference between stack and queue?|solved|ProfABC|Stack  is lifo and queue is fifo
+Aishika|DSA|What is the difference between stack and queue?|solved|ProfABC|Stack is lifo and queue is fifo
+Aishika|DSA|What is the difference between stack and queue?|solved|ProfABC|Stack is lifo and queue is fifo
+Aishika|DSA|What is the difference between stack and queue?|pending|N/A|N/A
