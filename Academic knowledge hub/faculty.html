@@ -267,6 +267,15 @@
             background: #229954;
         }
 
+        .btn-danger {
+            background: var(--danger-color);
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
         .list-container {
             background: var(--card-bg);
             border-radius: 8px;
@@ -276,11 +285,12 @@
         }
 
         .list-item {
-            padding: 1rem;
+            padding: 1rem 0;
             border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 1rem;
         }
 
         .list-item:last-child {
@@ -348,6 +358,65 @@
         .action-label {
             font-weight: 600;
             color: var(--text-dark);
+        }
+
+        /* ===== Faculty directory form styles ===== */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 0.75rem 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .form-field label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .form-field input {
+            padding: 0.4rem 0.6rem;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+            font-size: 0.85rem;
+            outline: none;
+            background: #FAFBFC;
+        }
+
+        .form-field input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(245, 166, 35, 0.25);
+            background: #fff;
+        }
+
+        .form-actions-row {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .status-text {
+            font-size: 0.85rem;
+        }
+
+        .status-success {
+            color: var(--success-color);
+        }
+
+        .status-error {
+            color: var(--danger-color);
+        }
+
+        .faculty-list-empty {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            padding: 0.5rem 0;
         }
 
         @media (max-width: 768px) {
@@ -605,16 +674,219 @@
                     </div>
                 </div>
             </div>
+
+            <!-- ========== NEW: Faculty Directory (connected to C backend) ========== -->
+            <h2 class="section-title">
+                <span>👨‍🏫 Faculty Directory</span>
+                <button class="btn btn-outline" id="refreshFacultyBtn">Refresh List</button>
+            </h2>
+
+            <div class="list-container">
+                <form id="addFacultyForm">
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label for="facName">Name *</label>
+                            <input type="text" id="facName" required placeholder="Dr. Sharma">
+                        </div>
+                        <div class="form-field">
+                            <label for="facId">Faculty ID *</label>
+                            <input type="text" id="facId" required placeholder="F101">
+                        </div>
+                        <div class="form-field">
+                            <label for="facDept">Department *</label>
+                            <input type="text" id="facDept" required placeholder="CSE">
+                        </div>
+                        <div class="form-field">
+                            <label for="facSubject">Subject *</label>
+                            <input type="text" id="facSubject" required placeholder="DSA">
+                        </div>
+                        <div class="form-field">
+                            <label for="facEmail">Email *</label>
+                            <input type="email" id="facEmail" required placeholder="faculty@geu.ac.in">
+                        </div>
+                    </div>
+                    <div class="form-actions-row">
+                        <button type="submit" class="btn btn-primary" style="flex:0 0 auto;">➕ Add Faculty</button>
+                        <span id="facultyFormStatus" class="status-text"></span>
+                    </div>
+                </form>
+
+                <hr style="margin:1rem 0;border:none;border-top:1px solid var(--border-color);">
+
+                <div id="facultyList"></div>
+            </div>
+            <!-- ===================================================================== -->
         </main>
     </div>
 
     <script>
+        const API_BASE = "http://localhost:3000";
+
+        // Sidebar active state (visual only)
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', function() {
                 document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
                 this.classList.add('active');
             });
         });
+
+        // ===== Faculty Directory Logic =====
+
+        const addFacultyForm = document.getElementById("addFacultyForm");
+        const facultyFormStatus = document.getElementById("facultyFormStatus");
+        const facultyListDiv = document.getElementById("facultyList");
+        const refreshFacultyBtn = document.getElementById("refreshFacultyBtn");
+
+        function setFacultyStatus(msg, type) {
+            facultyFormStatus.textContent = msg || "";
+            facultyFormStatus.className = "status-text";
+            if (type === "success") facultyFormStatus.classList.add("status-success");
+            if (type === "error") facultyFormStatus.classList.add("status-error");
+        }
+
+        function escapeHtml(text) {
+            if (!text) return "";
+            return text
+                .toString()
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+        }
+
+        async function loadFaculty() {
+            facultyListDiv.innerHTML = "<div class='faculty-list-empty'>Loading faculty records...</div>";
+            try {
+                const res = await fetch(API_BASE + "/api/faculty");
+                const data = await res.json();
+
+                if (!Array.isArray(data) || data.length === 0) {
+                    facultyListDiv.innerHTML = "<div class='faculty-list-empty'>No faculty records found yet.</div>";
+                    return;
+                }
+
+                const fragment = document.createElement("div");
+
+                data.forEach(f => {
+                    const item = document.createElement("div");
+                    item.className = "list-item";
+
+                    const infoDiv = document.createElement("div");
+                    infoDiv.className = "list-item-info";
+
+                    const title = document.createElement("h4");
+                    title.textContent = escapeHtml(f.name || "");
+
+                    const meta = document.createElement("div");
+                    meta.className = "list-item-meta";
+                    meta.textContent =
+                        "ID: " + (f.facultyId || "") +
+                        " • Dept: " + (f.department || "") +
+                        " • Subject: " + (f.subject || "") +
+                        " • " + (f.email || "");
+
+                    infoDiv.appendChild(title);
+                    infoDiv.appendChild(meta);
+
+                    const actionsDiv = document.createElement("div");
+                    actionsDiv.style.display = "flex";
+                    actionsDiv.style.gap = "0.5rem";
+                    actionsDiv.style.alignItems = "center";
+
+                    const badge = document.createElement("span");
+                    badge.className = "badge badge-active";
+                    badge.textContent = "Active";
+
+                    const delBtn = document.createElement("button");
+                    delBtn.className = "btn btn-danger";
+                    delBtn.style.flex = "0 0 auto";
+                    delBtn.textContent = "Delete";
+                    delBtn.addEventListener("click", () => {
+                        if (confirm("Delete faculty " + (f.name || "") + " (" + (f.facultyId || "") + ")?")) {
+                            deleteFaculty(f.facultyId);
+                        }
+                    });
+
+                    actionsDiv.appendChild(badge);
+                    actionsDiv.appendChild(delBtn);
+
+                    item.appendChild(infoDiv);
+                    item.appendChild(actionsDiv);
+
+                    fragment.appendChild(item);
+                });
+
+                facultyListDiv.innerHTML = "";
+                facultyListDiv.appendChild(fragment);
+            } catch (err) {
+                console.error(err);
+                facultyListDiv.innerHTML = "<div class='faculty-list-empty status-error'>✗ Cannot load faculty records.</div>";
+            }
+        }
+
+        async function deleteFaculty(facultyId) {
+            if (!facultyId) return;
+            try {
+                const res = await fetch(API_BASE + "/api/faculty/" + encodeURIComponent(facultyId), {
+                    method: "DELETE"
+                });
+                const data = await res.json();
+                if (data.success) {
+                    setFacultyStatus("Faculty removed successfully.", "success");
+                    loadFaculty();
+                } else {
+                    setFacultyStatus(data.message || "Failed to remove faculty.", "error");
+                }
+            } catch (err) {
+                console.error(err);
+                setFacultyStatus("✗ Cannot connect to backend server.", "error");
+            }
+        }
+
+        addFacultyForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            setFacultyStatus("");
+
+            const name = document.getElementById("facName").value.trim();
+            const facultyId = document.getElementById("facId").value.trim();
+            const department = document.getElementById("facDept").value.trim();
+            const subject = document.getElementById("facSubject").value.trim();
+            const email = document.getElementById("facEmail").value.trim();
+
+            if (!name || !facultyId || !department || !subject || !email) {
+                setFacultyStatus("Please fill all required fields.", "error");
+                return;
+            }
+
+            try {
+                const res = await fetch(API_BASE + "/api/faculty", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name, facultyId, department, subject, email })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    setFacultyStatus("Faculty added successfully.", "success");
+                    addFacultyForm.reset();
+                    loadFaculty();
+                } else {
+                    setFacultyStatus(data.message || "Failed to add faculty.", "error");
+                }
+            } catch (err) {
+                console.error(err);
+                setFacultyStatus("✗ Cannot connect to backend server.", "error");
+            }
+        });
+
+        refreshFacultyBtn.addEventListener("click", () => {
+            loadFaculty();
+        });
+
+        // Initial load
+        document.addEventListener("DOMContentLoaded", () => {
+            loadFaculty();
+        });
     </script>
 </body>
 </html>
+
