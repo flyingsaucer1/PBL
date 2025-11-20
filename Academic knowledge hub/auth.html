@@ -351,7 +351,7 @@
     </div>
 
     <script>
-        const API_URL = 'http://localhost:8080';
+     const API_URL = 'http://localhost:3000';
 
         function switchTab(tab) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -386,10 +386,22 @@
                 });
                 const data = await response.json();
                 if (data.success) {
-                    showAlert('✓ ' + data.message + ' You can now login.', 'success');
-                    document.querySelector('#registerForm form').reset();
-                    setTimeout(() => document.querySelectorAll('.tab-btn')[0].click(), 2000);
-                } else showAlert('✗ ' + data.message, 'error');
+    const session = {
+        token: data.token,
+        username,
+        role: data.role,
+        userId: data.userId
+    };
+
+    // Save session for the whole website
+    localStorage.setItem('akhUser', JSON.stringify(session));
+
+    // Go to main dashboard page
+    window.location.href = 'hub.html';
+} else {
+    showAlert('✗ ' + data.message, 'error');
+}
+
             } catch {
                 showAlert('✗ Cannot connect to backend server.', 'error');
             }
