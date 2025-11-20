@@ -23,11 +23,18 @@ typedef struct Post {
     struct Post* next;
 } Post;
 
+// Existing interactive functions
 void createPost(char* username);
 void viewAllPosts();
 void addComment(char* username);
 void viewPostWithComments();
 void initializeCommunity();
 void cleanupCommunity();
+
+// NEW helpers for API usage
+void addPostFromData(const char* title, const char* author, const char* content);
+void addCommentToPostFromData(const char* postTitle, const char* author, const char* text);
+void printAllPostsAsJson();
+void printPostWithCommentsAsJson(const char* title);
 
 #endif // COMMUNITY_H
