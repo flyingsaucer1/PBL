@@ -1,0 +1,4 @@
+campusCoders,pbl987,admin@geu.ac.in,admin,1
+testuser,pass123,testuser@geu.ac.in,student,1
+tuser,pass123,tuser@geu.ac.in,student,1
+Kriti,pbl987,285154848@geu.ac.in,student,1
