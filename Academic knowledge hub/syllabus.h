@@ -27,4 +27,10 @@ void viewAllSyllabus();
 void searchSyllabusBySubject();
 void viewBooksForSubject();
 
+// ADD THESE ↓↓↓
+void initializeSyllabus();
+void cleanupSyllabus();
+void saveAllSyllabus();
+void saveAllBooks();
+
 #endif

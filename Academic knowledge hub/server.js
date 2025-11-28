@@ -1,6 +1,6 @@
 const express = require("express");
 const { spawn } = require("child_process");
-const path = require("path");          // 🔥 ADD THIS
+const path = require("path");
 const app = express();
 const PORT = 3000;
 
@@ -9,11 +9,15 @@ app.use(express.json());
 // CORS for all routes
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,DELETE,OPTIONS"); // 🔥 ADD DELETE
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,DELETE,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   if (req.method === "OPTIONS") return res.sendStatus(200);
   next();
 });
+
+// ✅✅✅ SERVE STATIC HTML FILES FROM PUBLIC FOLDER
+app.use(express.static(path.join(__dirname, 'public')));
+
 
 
 /* ===============================
@@ -957,24 +961,4 @@ app.listen(PORT, () => {
 });
 app.get("/", (req, res) => {
     res.send("Backend running!");});
-    // 🟣 NOTES TEMP STORAGE
-let notes = [
-    { title: "Sample Note", subject: "DSA", content: "Sample content", faculty: "Prof X" }
-];
 
-// 🟢 GET ALL NOTES
-app.get("/notes", (req, res) => {
-    res.json(notes);
-});
-
-// 🟠 ADD NEW NOTE
-app.post("/notes", (req, res) => {
-    const { title, subject, content, faculty } = req.body;
-
-    if (!title || !subject || !content || !faculty) {
-        return res.json({ success: false, message: "All fields required" });
-    }
-
-    notes.push({ title, subject, content, faculty });
-    res.json({ success: true, message: "Note added!" });
-});
